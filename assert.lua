@@ -11,11 +11,9 @@ setmetatable(mtt.assert, {
 		local ref = mtt.luassert[key]
 		local ref_type = type(ref)
 		local ref_metatable = getmetatable(ref)
-		if ref_type == "function" or (ref_type == "table" and ref_metatable.__call) then
+		if ref_type == "function" then
 			return function(...)
-				local result, err = pcall(ref, ...)
-				mtt.assert.print(err)
-				return result
+				return ref(...)
 			end
 		elseif ref_type == "table" then
 			return ref
@@ -27,4 +25,11 @@ setmetatable(mtt.assert, {
 	__call = function(table, ...) table.True(...) end
 })
 
-mtt.assert(false)
+mtt.test = function(title, func)
+	local msg = string.format("test: %s", title)
+	mtt.notify("action", msg)
+
+	local result, err = pcall(func, mtt.luassert)
+	if err then mtt.assert.print(err) end
+	return result
+end
