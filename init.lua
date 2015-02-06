@@ -1,6 +1,7 @@
 local modpath = minetest.get_modpath(minetest.get_current_modname())
 mtt = {
 	modpath = modpath,
+	print = print, -- to allow mod_test to overwrite this with a custom version
 	notify = function(level, msg)
 		minetest.log(level, msg)
 		minetest.chat_send_all(level .. ": " .. msg)
