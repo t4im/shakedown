@@ -9,21 +9,11 @@ local function print(text, ...)
 		table.insert(out, text)
 	end
 end
-local failed = false
-local function try(msg, func, ...)
-	local result, err = pcall(func, ...)
-	if err then
-		print(msg, tostring(err))
-		failed = true
-	end
-	return result, err
-end
-local function flush()
-	local level = (not failed) and "action" or "error"
+local function flush(success)
+	local level = success and "action" or "error"
 	table.insert(out, "\n")
 	local msg = table.concat(out, "\n")
 	out = {}
-	failed = false
 
 	minetest.log(level, msg)
 	minetest.chat_send_all(level .. ": " .. msg)
@@ -43,32 +33,60 @@ function mtt.Test:new(object)
 	return object
 end
 
+function mtt.Test:try(msg, func, ...)
+	if not self.success then return end
+	local result, err = pcall(func, ...)
+	if err then
+		self.success = false
+		print(msg, tostring(err))
+	end
+	return result, err
+end
+
 function mtt.Test:run()
+	self.success = true
 	print("\n/==[ %70s ]===", self.description)
-	local result, err = try("! fails during setup:\n%s", self.func)
-	print("\\" .. string.rep("=", 66) .. "[ %6s ]===" , (not failed) and "ok" or "failed")
-	flush()
+	local result, err = self:try("! fails during setup:\n%s", self.func)
+
+	print("\\" .. string.rep("=", 66) .. "[ %6s ]===" , self.success and "ok" or "failed")
+	flush(self.success)
 	return result
 end
 
--- api
+-- running
+local current = nil
+function mtt.runAll()
+	local ok, fail = 0, 0
+	for _, test in pairs(tests) do
+		current = test
+		test:run()
+		if test.success then
+			ok = ok + 1
+		else
+			fail = fail + 1
+		end
+	end
+	local summary = string.format("***** Run %d tests (%d ok, %d failed) *****", ok+fail, ok, fail)
+	minetest.log("action", summary)
+	minetest.chat_send_all(summary)
+end
+
+-- description api
 function describe(description, func)
 	local test = mtt.Test:new{
 		description = description,
 		func = func
 	}
 	table.insert(tests, test)
-	return test, test:run()
+	return test
 end
 
 function given(description, func)
 	print("| given %s", description)
-	local result, err = try("! which was not given:\n%s", func)
-	return result
+	return current:try("! which was not given:\n%s", func)
 end
 
 function it(description, func)
 	print("| it %s", description)
-	local result, err = try("! if it would not fail with:\n%s", func, mtt.luassert)
-	return result
+	return current:try("! if it would not fail with:\n%s", func, mtt.luassert)
 end
