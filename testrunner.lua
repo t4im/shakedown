@@ -1,3 +1,6 @@
+local tests = {}
+
+-- output buffer
 local out = {}
 local function print(text, ...)
 	if (...) then
@@ -15,7 +18,6 @@ local function try(msg, func, ...)
 	end
 	return result, err
 end
-
 local function flush()
 	local level = (not failed) and "action" or "error"
 	table.insert(out, "\n")
@@ -27,12 +29,36 @@ local function flush()
 	minetest.chat_send_all(level .. ": " .. msg)
 end
 
-function describe(description, func)
-	print("\n/==[ %70s ]===", description)
-	local result, err = try("! fails during setup:\n%s", func)
+-- test class
+mtt.Test = {
+	description=nil,
+	func=function() error("no test setup defined") end,
+}
+
+function mtt.Test:new(object)
+	object = object or {}
+	setmetatable(object, self)
+	self.__index = self
+	self.__tostring = function (self) return self.description end
+	return object
+end
+
+function mtt.Test:run()
+	print("\n/==[ %70s ]===", self.description)
+	local result, err = try("! fails during setup:\n%s", self.func)
 	print("\\" .. string.rep("=", 66) .. "[ %6s ]===" , (not failed) and "ok" or "failed")
 	flush()
 	return result
+end
+
+-- api
+function describe(description, func)
+	local test = mtt.Test:new{
+		description = description,
+		func = func
+	}
+	table.insert(tests, test)
+	return test, test:run()
 end
 
 function given(description, func)
