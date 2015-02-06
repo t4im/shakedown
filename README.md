@@ -18,4 +18,4 @@ detailed_profiling = true
 ```
 in your `minetest.conf`.
 
-Use `/save_mod_profile` to print out runtime statistics to `stdout` and `debug.txt.`
+Use `/save_mod_profile [filter]` to print out runtime statistics, optionally filtered to a specific mod, to `stdout` and `debug.txt`.
