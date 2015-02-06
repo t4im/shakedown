@@ -1,4 +1,5 @@
 local modpath = minetest.get_modpath(minetest.get_current_modname())
+dofile(modpath .. "/strict.lua")
 dofile(modpath .. "/protection.lua")
 dofile(modpath .. "/inspector.lua")
 
