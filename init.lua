@@ -12,5 +12,6 @@ package.path =
 	package.path
 
 dofile(modpath .. "/assert.lua")
+dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/recipes.lua")
 

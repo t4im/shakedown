@@ -24,12 +24,3 @@ setmetatable(mtt.assert, {
 	end,
 	__call = function(table, ...) table.True(...) end
 })
-
-mtt.test = function(title, func)
-	local msg = string.format("test: %s", title)
-	mtt.notify("action", msg)
-
-	local result, err = pcall(func, mtt.luassert)
-	if err then mtt.assert.print(err) end
-	return result
-end
