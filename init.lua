@@ -1,4 +1,5 @@
 local modpath = minetest.get_modpath(minetest.get_current_modname())
+dofile(modpath .. "/protection.lua")
 dofile(modpath .. "/inspector.lua")
 
 minetest.register_on_newplayer(function(player)
@@ -8,6 +9,3 @@ minetest.register_on_newplayer(function(player)
 	inventory:add_item('main', 'default:axe_diamond')
 	inventory:add_item('main', 'default:shovel_diamond')
 end)
-
-
-
