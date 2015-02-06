@@ -35,6 +35,12 @@ function describe(description, func)
 	return result
 end
 
+function given(description, func)
+	print("| given %s", description)
+	local result, err = try("! which was not given:\n%s", func)
+	return result
+end
+
 function it(description, func)
 	print("| it %s", description)
 	local result, err = try("! if it would not fail with:\n%s", func, mtt.luassert)
