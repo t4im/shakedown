@@ -1,4 +1,4 @@
-local tests = {}
+local specifications = {}
 
 -- output buffer
 local out = {}
@@ -19,53 +19,89 @@ local function flush(success)
 	minetest.chat_send_all(level .. ": " .. msg)
 end
 
--- test class
-mtt.Test = {
+-- classes
+mtt.Testable = {
 	description=nil,
-	func=function() error("no test setup defined") end,
+	func=function() error("no test defined") end,
+	success = nil,
+	__tostring = function (self) return self.description end,
+	new = function(self, object)
+		setmetatable(object or {}, self)
+		self.__index = self
+		return object
+	end,
+	try = function(self, msg, func, ...)
+		if not self.success then return end
+		local result, err = pcall(func, ...)
+		if err then
+			self.success = false
+			print(msg, tostring(err))
+		end
+		return result, err
+	end
 }
 
-function mtt.Test:new(object)
-	object = object or {}
-	setmetatable(object, self)
-	self.__index = self
-	self.__tostring = function (self) return self.description end
-	return object
-end
-
-function mtt.Test:try(msg, func, ...)
-	if not self.success then return end
-	local result, err = pcall(func, ...)
-	if err then
-		self.success = false
-		print(msg, tostring(err))
+mtt.TestCase = mtt.Testable:new{
+	run = function(self)
+		self.success = true
+		print("+ %s", self.description)
+		local result, err = self:try("! but fails with\n%s", self.func, mtt.assert)
+		return result
 	end
-	return result, err
-end
+}
 
-function mtt.Test:run()
-	self.success = true
-	print("\n/==[ %70s ]===", self.description)
-	local result, err = self:try("! fails during setup:\n%s", self.func)
+local current_case = nil
+mtt.Specification = mtt.Testable:new{
+	new = function(self, object)
+		object = mtt.Testable.new(self, object)
+		object.testcases = {}
+		return object
+	end,
+	run = function(self)
+		self.success = true
+		print("\n===[ %70s ]===", self.description)
+		local result, err = self:try("! fails during setup:\n%s", self.func)
 
-	print("\\" .. string.rep("=", 66) .. "[ %6s ]===" , self.success and "ok" or "failed")
-	flush(self.success)
-	return result
-end
+		local ok, fail = 0, 0
+		for _, testcase in pairs(self.testcases) do
+			current_case = testcase
+			testcase:run()
+			if testcase.success then
+				ok = ok + 1
+			else
+				fail = fail + 1
+			end
+		end
+		if fail > 0 then self.success = false end
+		local summary = string.format("%s (%d/%d)", self.success and "ok" or "fail", ok, ok+fail)
+		print("=========================================================[ %16s ]===" , summary)
+		flush(self.success)
+		return result
+	end,
+	register_testcase = function(self, description, func)
+		local testcase = mtt.TestCase:new{
+			description = description,
+			func = func
+		}
+		table.insert(self.testcases, testcase)
+		return testcase
+	end
+}
 
 -- running
-local current = nil
+local current_spec = nil
 function mtt.runAll()
 	local ok, fail = 0, 0
-	for _, test in pairs(tests) do
-		current = test
-		test:run()
-		if test.success then
+	for _, spec in pairs(specifications) do
+		current_spec = spec
+		spec:run()
+		if spec.success then
 			ok = ok + 1
 		else
 			fail = fail + 1
 		end
 	end
+	current_spec = nil
 	local summary = string.format("***** Run %d tests (%d ok, %d failed) *****", ok+fail, ok, fail)
 	minetest.log("action", summary)
 	minetest.chat_send_all(summary)
@@ -73,20 +109,18 @@ end
 
 -- description api
 function describe(description, func)
-	local test = mtt.Test:new{
+	local spec = mtt.Specification:new{
 		description = description,
 		func = func
 	}
-	table.insert(tests, test)
-	return test
-end
-
-function given(description, func)
-	print("| given %s", description)
-	return current:try("! which was not given:\n%s", func)
+	table.insert(specifications, spec)
+	return spec
 end
 
 function it(description, func)
-	print("| it %s", description)
-	return current:try("! if it would not fail with:\n%s", func, mtt.luassert)
+	return current_spec:register_testcase("it " .. description, func)
+end
+
+function given(description, func)
+	return current_spec:register_testcase("given " .. description, func)
 end
