@@ -44,8 +44,8 @@ mtt.Testable = {
 mtt.TestCase = mtt.Testable:new{
 	run = function(self)
 		self.success = true
-		print("+ %s", self.description)
-		local result, err = self:try("! but fails with\n%s", self.func, mtt.assert)
+		print("- %s", self.description)
+		local result, err = self:try("[!] but fails with\n%s", self.func, mtt.assert)
 		return result
 	end
 }
@@ -60,7 +60,7 @@ mtt.Specification = mtt.Testable:new{
 	run = function(self)
 		self.success = true
 		print("\n===[ %70s ]===", self.description)
-		local result, err = self:try("! fails during setup:\n%s", self.func)
+		local result, err = self:try("[!] fails during setup:\n%s", self.func)
 
 		local ok, fail = 0, 0
 		for _, testcase in pairs(self.testcases) do
@@ -127,6 +127,6 @@ function given(description, func)
 	return current_spec:register_testcase("given " .. description, func)
 end
 
-function Given(description) print("  - Given %s", description) end
-function When(description) print("  - When %s", description) end
-function Then(description) print("  - Then %s", description) end
+function Given(description) print("  + Given %s", description) end
+function When(description) print("  + When %s", description) end
+function Then(description) print("  + Then %s", description) end
