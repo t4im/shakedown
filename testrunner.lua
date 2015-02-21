@@ -124,3 +124,7 @@ end
 function given(description, func)
 	return current_spec:register_testcase("given " .. description, func)
 end
+
+function Given(description) print("  - Given %s", description) end
+function When(description) print("  - When %s", description) end
+function Then(description) print("  - Then %s", description) end
