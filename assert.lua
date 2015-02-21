@@ -6,6 +6,7 @@ mtt.assert = {
 	end
 }
 
+local original_assert = assert
 setmetatable(mtt.assert, {
 	__index = function(table, key)
 		local ref = mtt.luassert[key]
@@ -22,5 +23,8 @@ setmetatable(mtt.assert, {
 		end
 		error("unexpected datatype " .. tostring(type(ref)) .. " while looking for " .. key)
 	end,
-	__call = function(table, ...) table.True(...) end
+	__call = function(table, ...) return original_assert(...) end
 })
+
+-- convenience overwrite
+assert = mtt.assert

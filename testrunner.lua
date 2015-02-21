@@ -107,7 +107,9 @@ function mtt.runAll()
 	minetest.chat_send_all(summary)
 end
 
--- description api
+-- globalized api for ease of use
+-- as unit testing framework we can defy the best practice of avoiding globals
+-- to ease the creation of unit tests; we are not supposed to run in production anyway
 function describe(description, func)
 	local spec = mtt.Specification:new{
 		description = description,
