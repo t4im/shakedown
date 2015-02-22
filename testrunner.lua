@@ -62,6 +62,7 @@ mtt.Specification = mtt.Testable:new{
 		print("\n===[ %70s ]===", self.description)
 		local result, err = self:try("[!] fails during setup:\n%s", self.func)
 
+		if self.before then self.before() end
 		local ok, fail = 0, 0
 		for _, testcase in pairs(self.testcases) do
 			current_case = testcase
@@ -73,6 +74,8 @@ mtt.Specification = mtt.Testable:new{
 			end
 		end
 		if fail > 0 then self.success = false end
+		if self.after then self.after() end
+
 		local summary = string.format("%s (%d/%d)", self.success and "ok" or "fail", ok, ok+fail)
 		print("=========================================================[ %16s ]===" , summary)
 		flush(self.success)
@@ -117,6 +120,14 @@ function describe(description, func)
 	}
 	table.insert(specifications, spec)
 	return spec
+end
+
+function before(func)
+	current_spec.before = func
+end
+
+function after(func)
+	current_spec.after = func
 end
 
 function it(description, func)
