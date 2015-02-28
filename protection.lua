@@ -21,10 +21,10 @@ minetest.register_chatcommand("protect", {
 			protection_states[name] = false
 		elseif param == "default" or param == "." then
 			protection_states[name] = nil
-		else
-			local state = protection_states[name] == nil and "default"
-					or protection_states[name] and "on" or "off"
-			minetest.chat_send_player(name, "Protection is " ..  state)
 		end
+
+		local state = protection_states[name] == nil and "default"
+				or protection_states[name] and "on" or "off"
+		return true, string.format("Protection set to '%s'",  state)
 	end
 })
