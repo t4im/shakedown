@@ -76,11 +76,11 @@ local function switch_tab(playername, tab_index, pos, ...)
 		tabs[tab_index]:formspec(pos, ...) ..
 		string.format("button_exit[%f,%f;2,1;close;Close]", fs_width - 2, fs_height - 0.7)
 
-	minetest.show_formspec(playername, "mtt:inspect", formspec)
+	minetest.show_formspec(playername, "mod_test:inspect", formspec)
 end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if formname == "mtt:inspect" then
+	if formname == "mod_test:inspect" then
 		local tab_index = tonumber(fields.tab)
 		if tab_index and tabs[tab_index] then
 			local pos = fields.position and minetest.string_to_pos(fields.position) or {x=0, y=0, z=0}
@@ -90,7 +90,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 end)
 
-minetest.register_tool("mod_test:metadata_inspector", {
+minetest.register_tool("mod_test:inspector", {
 	description = "metadata inspector",
 	inventory_image = "mtt_magnifying_glass.png",
 	on_use = function(itemstack, user, pointed_thing)
@@ -99,3 +99,4 @@ minetest.register_tool("mod_test:metadata_inspector", {
 		switch_tab(user:get_player_name(), 1, pos)
 	end,
 })
+minetest.register_alias("mod_test:metadata_inspector", "mod_test:inspector")
