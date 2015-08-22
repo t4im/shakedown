@@ -8,9 +8,15 @@ table.insert(tabs, {
 	formspec = function(self, pos)
 		local node = minetest.get_node(pos)
 		local meta = minetest.get_meta(pos)
-		local text = minetest.formspec_escape(dump(meta:to_table().fields))
+		local fields = meta:to_table().fields
 
-		return ("textarea[0.3,0;%f,%f;text;;%s]"):format(fs_width - side_width, fs_height, text)
+		local cells = ""
+		for key, value in pairs(fields) do
+			cells = string.format("%s,%s,%s", cells, minetest.formspec_escape(key), minetest.formspec_escape(value))
+		end
+
+		return "tablecolumns[text;text]" ..
+			string.format("table[0,0;%f,%f;metatable;%s1]", fs_width - side_width - .3, fs_height, cells:sub(2))
 	end
 })
 
