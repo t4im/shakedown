@@ -21,6 +21,34 @@ table.insert(tabs, {
 })
 
 table.insert(tabs, {
+	caption = "Inventories",
+	formspec = function(self, pos)
+		local node = minetest.get_node(pos)
+		local meta = minetest.get_meta(pos)
+		local inv = meta:get_inventory()
+		local inventory_lists = inv:get_lists()
+		local cells = ""
+		for name, list in pairs(inventory_lists) do
+			cells = string.format("%s,0,%s,(Size %d),,", cells,
+				minetest.formspec_escape(name), #list)
+
+			for _, stack in ipairs(list) do
+				local count = stack:get_count()
+				if count == 0 then
+					cells = cells .. ",1,-,<empty>,,"
+				else
+					cells = string.format("%s,1,%d,%s,%s,%s", cells,
+						count, stack:get_name(), stack:get_wear(), minetest.formspec_escape(stack:get_metadata()))
+				end
+			end
+		end
+
+		return "tablecolumns[indent;text;text;text;text]" ..
+			string.format("table[0,0;%f,%f;invtable;%s;1]", fs_width - side_width - .3, fs_height, cells:sub(2))
+	end
+})
+
+table.insert(tabs, {
 	caption = "Raw Metadata",
 	formspec = function(self, pos)
 		local node = minetest.get_node(pos)
