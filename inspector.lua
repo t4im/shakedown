@@ -15,7 +15,7 @@ end
 
 minetest.register_tool("mod_test:metadata_inspector", {
 	description = "metadata inspector",
-	inventory_image = "experimental_tester_tool_1.png",
+	inventory_image = "mtt_magnifying_glass.png",
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = pointed_thing.under
 		if not pos then return end -- pointed at air
