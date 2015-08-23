@@ -1,8 +1,9 @@
-local reporter = mtt.reporter
-local write = reporter.write
-local report = reporter.formatter
+local table, mtt, reporter, report = table, mtt, mtt.reporter, mtt.reporter.formatter
 
 local specifications = {}
+mtt.specifications = specifications
+local testrunner = {}
+mtt.testrunner = testrunner
 
 -- classes
 mtt.Testable = {
@@ -37,7 +38,6 @@ mtt.TestCase = mtt.Testable:new{
 	end,
 }
 
-local current_case = nil
 mtt.Specification = mtt.Testable:new{
 	new = function(self, object)
 		object = mtt.Testable.new(self, object)
@@ -56,7 +56,7 @@ mtt.Specification = mtt.Testable:new{
 		if self.before then self.before() end
 		local ok, fail = 0, 0
 		for _, testcase in pairs(self.testcases) do
-			current_case = testcase
+			testrunner.ctx_case = testcase
 			testcase:run()
 			if testcase.success then
 				ok = ok + 1
@@ -64,6 +64,8 @@ mtt.Specification = mtt.Testable:new{
 				fail = fail + 1
 			end
 		end
+		testrunner.ctx_case = nil
+
 		if fail > 0 then self.success = false end
 		if self.after then self.after() end
 
@@ -82,11 +84,10 @@ mtt.Specification = mtt.Testable:new{
 }
 
 -- running
-local current_spec = nil
-function mtt.runAll()
+function mtt.testrunner:runAll()
 	local ok, fail = 0, 0
 	for _, spec in pairs(specifications) do
-		current_spec = spec
+		self.ctx_spec = spec
 		spec:run()
 		if spec.success then
 			ok = ok + 1
@@ -94,7 +95,7 @@ function mtt.runAll()
 			fail = fail + 1
 		end
 	end
-	current_spec = nil
+	self.ctx_spec = nil
 	report: summary(ok, fail)
 	reporter.flush()
 end
@@ -111,19 +112,19 @@ mtt.testcase_env = testcase_env
 mtt.spec_env = {
 	it = function(description, func)
 		setfenv(func, testcase_env)
-		return current_spec:register_testcase("it " .. description, func)
+		return testrunner.ctx_spec:register_testcase("it " .. description, func)
 	end,
 	given = function(description, func)
 		setfenv(func, testcase_env)
-		return current_spec:register_testcase("given " .. description, func)
+		return testrunner.ctx_spec:register_testcase("given " .. description, func)
 	end,
 	before = function(func)
 		setfenv(func, testcase_env)
-		current_spec.before = func
+		testrunner.ctx_spec.before = func
 	end,
 	after = function(func)
 		setfenv(func, testcase_env)
-		current_spec.after = func
+		testrunner.ctx_spec.after = func
 	end,
 }
 

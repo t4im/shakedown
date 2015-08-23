@@ -18,5 +18,5 @@ dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/recipes.lua")
 
 minetest.after(1, function ()
-	mtt.runAll()
+	mtt.testrunner:runAll()
 end)
