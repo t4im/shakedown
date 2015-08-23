@@ -8,6 +8,8 @@ mtt = {
 	end,
 }
 
+dofile(modpath .. "/compat.lua")
+
 -- load luassert assertions
 package.path =
 	modpath .. "/?/init.lua;" ..
