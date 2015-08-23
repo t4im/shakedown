@@ -110,10 +110,40 @@ function mtt.runAll()
 	minetest.chat_send_all(summary)
 end
 
+-- define function environments for more control over the dsl (and less _G pollution)
+local testcase_env =
+	setmetatable({
+		Given = function(description) print("  + Given %s", description) end,
+		When = function(description) print("  + When %s", description) end,
+		Then = function(description) print("  + Then %s", description) end,
+	}, {__index = _G})
+mtt.testcase_env = testcase_env
+
+mtt.spec_env = {
+	it = function(description, func)
+		setfenv(func, testcase_env)
+		return current_spec:register_testcase("it " .. description, func)
+	end,
+	given = function(description, func)
+		setfenv(func, testcase_env)
+		return current_spec:register_testcase("given " .. description, func)
+	end,
+	before = function(func)
+		setfenv(func, testcase_env)
+		current_spec.before = func
+	end,
+	after = function(func)
+		setfenv(func, testcase_env)
+		current_spec.after = func
+	end,
+}
+
 -- globalized api for ease of use
 -- as unit testing framework we can defy the best practice of avoiding globals
 -- to ease the creation of unit tests; we are not supposed to run in production anyway
 function describe(description, func)
+	setfenv(func, setmetatable(mtt.spec_env, {__index = _G}))
+
 	local spec = mtt.Specification:new{
 		description = description,
 		func = func
@@ -121,23 +151,3 @@ function describe(description, func)
 	table.insert(specifications, spec)
 	return spec
 end
-
-function before(func)
-	current_spec.before = func
-end
-
-function after(func)
-	current_spec.after = func
-end
-
-function it(description, func)
-	return current_spec:register_testcase("it " .. description, func)
-end
-
-function given(description, func)
-	return current_spec:register_testcase("given " .. description, func)
-end
-
-function Given(description) print("  + Given %s", description) end
-function When(description) print("  + When %s", description) end
-function Then(description) print("  + Then %s", description) end
