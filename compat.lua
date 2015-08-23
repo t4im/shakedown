@@ -1,4 +1,8 @@
 ---
+-- lua 5.2 requires debug retrieval via require
+debug = debug or require "debug"
+
+---
 -- lua 5.2 removes setfenv in favour of _ENV
 -- since we make make heavy use of setfenv, and _ENV doesn't support easy setting from the outside
 -- (as done in the testing language)
