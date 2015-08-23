@@ -1,41 +1,28 @@
+local reporter = mtt.reporter
+local write = reporter.write
+local report = reporter.formatter
+
 local specifications = {}
-
--- output buffer
-local out = {}
-local function print(text, ...)
-	if (...) then
-		table.insert(out, string.format(text, ...))
-	else
-		table.insert(out, text)
-	end
-end
-local function flush(success)
-	local level = success and "action" or "error"
-	table.insert(out, "\n")
-	local msg = table.concat(out, "\n")
-	out = {}
-
-	minetest.log(level, msg)
-	minetest.chat_send_all(level .. ": " .. msg)
-end
 
 -- classes
 mtt.Testable = {
 	description=nil,
-	func=function() error("no test defined") end,
+	func= function() error("no test defined") end,
 	success = nil,
 	__tostring = function (self) return self.description end,
 	new = function(self, object)
-		setmetatable(object or {}, self)
 		self.__index = self
-		return object
+		return setmetatable(object or {}, self)
 	end,
-	try = function(self, msg, func, ...)
+	fail = function(self, err)
+		self.success = false
+		report: error(tostring(err))
+	end,
+	try = function(self, func, ...)
 		if not self.success then return end
 		local result, err = pcall(func, ...)
 		if err then
-			self.success = false
-			print(msg, tostring(err))
+			self:fail(err)
 		end
 		return result, err
 	end
@@ -44,10 +31,10 @@ mtt.Testable = {
 mtt.TestCase = mtt.Testable:new{
 	run = function(self)
 		self.success = true
-		print("- %s", self.description)
-		local result, err = self:try("[!] but fails with\n%s", self.func, mtt.assert)
+		report: testcase(self.description)
+		local result, err = self:try(self.func, mtt.assert)
 		return result
-	end
+	end,
 }
 
 local current_case = nil
@@ -57,10 +44,14 @@ mtt.Specification = mtt.Testable:new{
 		object.testcases = {}
 		return object
 	end,
+	fail = function(self, err)
+		self.success = false
+		report: spec_error(tostring(err))
+	end,
 	run = function(self)
 		self.success = true
-		print("\n===[ %70s ]===", self.description)
-		local result, err = self:try("[!] fails during setup:\n%s", self.func)
+		report: specification(self.description)
+		local result, err = self:try(self.func)
 
 		if self.before then self.before() end
 		local ok, fail = 0, 0
@@ -76,9 +67,8 @@ mtt.Specification = mtt.Testable:new{
 		if fail > 0 then self.success = false end
 		if self.after then self.after() end
 
-		local summary = string.format("%s (%d/%d)", self.success and "ok" or "fail", ok, ok+fail)
-		print("=========================================================[ %16s ]===" , summary)
-		flush(self.success)
+		report: spec_summary(ok, fail)
+		reporter.flush(self.success and "action" or "error")
 		return result
 	end,
 	register_testcase = function(self, description, func)
@@ -105,17 +95,16 @@ function mtt.runAll()
 		end
 	end
 	current_spec = nil
-	local summary = string.format("***** Run %d tests (%d ok, %d failed) *****", ok+fail, ok, fail)
-	minetest.log("action", summary)
-	minetest.chat_send_all(summary)
+	report: summary(ok, fail)
+	reporter.flush()
 end
 
 -- define function environments for more control over the dsl (and less _G pollution)
 local testcase_env =
 	setmetatable({
-		Given = function(description) print("  + Given %s", description) end,
-		When = function(description) print("  + When %s", description) end,
-		Then = function(description) print("  + Then %s", description) end,
+		Given = function(description) report: step("Given", description) end,
+		When = function(description) report: step("When", description) end,
+		Then = function(description) report: step("Then", description) end,
 	}, {__index = _G})
 mtt.testcase_env = testcase_env
 
