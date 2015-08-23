@@ -7,14 +7,18 @@ mtt = {
 		minetest.chat_send_all(level .. ": " .. msg)
 	end,
 }
+
+-- load luassert assertions
 package.path =
 	modpath .. "/?/init.lua;" ..
 	modpath .. "/?.lua;" ..
 	package.path
+mtt.luassert = require("luassert")
 
-dofile(modpath .. "/assert.lua")
 dofile(modpath .. "/reporter.lua")
 dofile(modpath .. "/testrunner.lua")
+dofile(modpath .. "/api.lua")
+
 dofile(modpath .. "/recipes.lua")
 
 minetest.after(1, function ()

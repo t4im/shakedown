@@ -33,7 +33,7 @@ mtt.TestCase = mtt.Testable:new{
 	run = function(self)
 		self.success = true
 		report: testcase(self.description)
-		local result, err = self:try(self.func, mtt.assert)
+		local result, err = self:try(self.func)
 		return result
 	end,
 }
@@ -98,46 +98,4 @@ function mtt.testrunner:runAll()
 	self.ctx_spec = nil
 	report: summary(ok, fail)
 	reporter.flush()
-end
-
--- define function environments for more control over the dsl (and less _G pollution)
-local testcase_env =
-	setmetatable({
-		Given = function(description) report: step("Given", description) end,
-		When = function(description) report: step("When", description) end,
-		Then = function(description) report: step("Then", description) end,
-	}, {__index = _G})
-mtt.testcase_env = testcase_env
-
-mtt.spec_env = {
-	it = function(description, func)
-		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("it " .. description, func)
-	end,
-	given = function(description, func)
-		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("given " .. description, func)
-	end,
-	before = function(func)
-		setfenv(func, testcase_env)
-		testrunner.ctx_spec.before = func
-	end,
-	after = function(func)
-		setfenv(func, testcase_env)
-		testrunner.ctx_spec.after = func
-	end,
-}
-
--- globalized api for ease of use
--- as unit testing framework we can defy the best practice of avoiding globals
--- to ease the creation of unit tests; we are not supposed to run in production anyway
-function describe(description, func)
-	setfenv(func, setmetatable(mtt.spec_env, {__index = _G}))
-
-	local spec = mtt.Specification:new{
-		description = description,
-		func = func
-	}
-	table.insert(specifications, spec)
-	return spec
 end
