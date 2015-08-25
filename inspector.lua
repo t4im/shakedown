@@ -51,6 +51,41 @@ insert(tabs, {
 	end
 })
 
+local function concat_kv_row(cells, level, key, value)
+	local type = type(value)
+	if type == "string" then
+		value = value:format("%q")
+	elseif type == "table" then
+		cells = string.format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
+		for key, value in pairs(value) do
+			cells = concat_kv_row(cells,level + 1,key,value)
+		end
+		return cells
+	end
+
+	return string.format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
+end
+
+insert(tabs, {
+	caption = "Node Definition",
+	formspec = function(self, pos)
+		local node = core.get_node(pos)
+		local definition = core.registered_nodes[node.name]
+		if not definition then
+			return "label[1,1;This node has no definition.]"
+		end
+
+		local cells = ""
+		for key, value in pairs(definition) do
+			cells = concat_kv_row(cells, 0,key,value)
+		end
+
+		return "tablecolumns[indent;text;text]" ..
+			string.format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
+			("button[%f,%f;2,1;raw_nodedef;Raw Table]"):format(fs_width - 2, fs_height - 0.7 * 2 - 0.3)
+	end
+})
+
 local captions = ""
 for _, tab in ipairs(tabs) do
 	captions = captions .. "," .. tab.caption
@@ -82,11 +117,8 @@ local function create_inspector_formspec(pos, def)
 	return table.concat(formspec)
 end
 
-local function open_raw_meta_data(playername, pos)
-	local node = core.get_node(pos)
-	local meta = core.get_meta(pos)
-	local text = core.formspec_escape(dump(meta:to_table()))
-
+local function show_raw_table_data(playername, pos, table)
+	local text = core.formspec_escape(dump(table or {}))
 	core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
 		tmp_tab = "Raw Metadata",
 		content = ("textarea[0.3,0;%f,%f;text;;%s]"):format(fs_width - side_width, fs_height, text),
@@ -110,8 +142,16 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 	local tab_index = tonumber(fields.tab)
 	if tab_index and tabs[tab_index] then
 		switch_tab(playername, tab_index, pos)
-	elseif fields.raw_metadata then
-		open_raw_meta_data(playername, pos)
+		return true
+	end
+
+	local meta = core.get_meta(pos)
+	local node = core.get_node(pos)
+
+	if fields.raw_metadata then
+		show_raw_table_data(playername, pos, meta:to_table())
+	elseif fields.raw_nodedef then
+		show_raw_table_data(playername, pos, core.registered_nodes[node.name])
 	end
 
 	return true
