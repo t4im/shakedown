@@ -120,10 +120,17 @@ end)
 core.register_tool("mod_test:inspector", {
 	description = "metadata inspector",
 	inventory_image = "mtt_magnifying_glass.png",
+	range = 16,
+	liquids_pointable = true,
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = pointed_thing.under
 		if not pos then return end -- pointed at air
 		switch_tab(user:get_player_name(), 1, pos)
+	end,
+	on_place = function(itemstack, placer, pointed_thing)
+		local pos = pointed_thing.above
+		if not pos then return end -- pointed at air
+		switch_tab(placer:get_player_name(), 1, pos)
 	end,
 })
 core.register_alias("mod_test:metadata_inspector", "mod_test:inspector")
