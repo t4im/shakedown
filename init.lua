@@ -21,6 +21,7 @@ dofile(modpath .. "/reporter.lua")
 dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/api.lua")
 
+dofile(modpath .. "/mocks/init.lua")
 dofile(modpath .. "/recipes.lua")
 
 minetest.after(1, function ()
