@@ -7,3 +7,4 @@ package.path =
 	package.path
 
 mtt.luassert = require("luassert")
+mtt.luassert_match = require("luassert.match")
