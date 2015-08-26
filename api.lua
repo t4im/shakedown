@@ -50,7 +50,16 @@ local spec_env = {
 		testrunner.ctx_spec.after = func
 	end,
 }
-mtt.spec_env = setmetatable(spec_env, { __index = abstract_test_env, })
+
+mtt.spec_env = setmetatable(spec_env, {
+	__index = abstract_test_env,
+	__newindex = function(table, key, value)
+		-- alternative way to specify fixtures
+		if type(table[key]) == "function" and type(value) == "function" then
+			table[key](value)
+		end
+	end,
+})
 
 local suite_env = {
 	describe = function(description, func)
