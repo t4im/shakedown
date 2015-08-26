@@ -4,7 +4,7 @@ local mtt, testrunner, report = mtt, mtt.testrunner, mtt.reporter.formatter
 --
 mtt.assert = {
 	-- for custom asserts, that aren't available in luassert
-}
+	}
 
 local original_assert = assert
 setmetatable(mtt.assert, {
@@ -19,16 +19,20 @@ assert = mtt.assert
 --
 -- test definition language
 --
-local testcase_env =
-	setmetatable({
-		assert = mtt.assert, -- you shall have no other drop-in replacements beside me here
-		Given = function(description) report: step("Given", description) end,
-		When = function(description) report: step("When", description) end,
-		Then = function(description) report: step("Then", description) end,
-	}, {__index = _G})
-mtt.testcase_env = testcase_env
+local abstract_test_env = {
+	assert = mtt.assert, -- you shall have no other drop-in replacements beside me here
+	match = mtt.match,
+}
+mtt.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
-mtt.spec_env = {
+local testcase_env = {
+	Given = function(description) report: step("Given", description) end,
+	When = function(description) report: step("When", description) end,
+	Then = function(description) report: step("Then", description) end,
+}
+mtt.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
+
+local spec_env = {
 	it = function(description, func)
 		setfenv(func, testcase_env)
 		return testrunner.ctx_spec:register_testcase("it " .. description, func)
@@ -46,10 +50,11 @@ mtt.spec_env = {
 		testrunner.ctx_spec.after = func
 	end,
 }
+mtt.spec_env = setmetatable(spec_env, { __index = abstract_test_env, })
 
-mtt.test_env = {
+local suite_env = {
 	describe = function(description, func)
-		setfenv(func, setmetatable(mtt.spec_env, {__index = _G}))
+		setfenv(func, mtt.spec_env)
 
 		local spec = mtt.Specification:new{
 			description = description,
@@ -59,8 +64,9 @@ mtt.test_env = {
 		return spec
 	end
 }
+mtt.suite_env = setmetatable(suite_env, { __index = abstract_test_env, })
 
 -- globalized api for ease of use
 -- as unit testing framework we can defy the best practice of avoiding globals
 -- to ease the creation of unit tests; we are not supposed to run in production anyway
-describe = mtt.test_env.describe
+describe = mtt.suite_env.describe
