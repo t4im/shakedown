@@ -8,21 +8,19 @@ mtt = {
 	end,
 }
 
+-- load compatibility layer between lua versions
 dofile(modpath .. "/compat.lua")
+-- load external dependencies
+dofile(modpath .. "/lib/init.lua")
 
--- load luassert assertions
-package.path =
-	modpath .. "/?/init.lua;" ..
-	modpath .. "/?.lua;" ..
-	package.path
-mtt.luassert = require("luassert")
-
-dofile(modpath .. "/reporter.lua")
+-- the mtt engine itself
+dofile(modpath .. "/reporter/init.lua")
 dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/api.lua")
 
+-- supporting components
 dofile(modpath .. "/mocks/init.lua")
-dofile(modpath .. "/recipes.lua")
+dofile(modpath .. "/provider/init.lua")
 
 minetest.after(1, function ()
 	mtt.testrunner:runAll()
