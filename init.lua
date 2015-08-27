@@ -8,6 +8,9 @@ mtt = {
 	end,
 }
 
+-- load constants and configuration
+dofile(modpath .. "/config.lua")
+
 -- load compatibility layer between lua versions
 dofile(modpath .. "/compat.lua")
 -- load external dependencies
