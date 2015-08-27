@@ -1,3 +1,39 @@
+--
+-- configuration handling
+--
+-- You can use several places to set these configs.
+-- However do not set them in this lua file. Only defaults belong here.
+--
+-- Available places for your convenience (in order of precedence):
+-- * global minetest.conf (key needs to be prefixed with "mtt_")
+-- * per game minetest.conf (key needs to be prefixed with "mtt_")
+-- * mtt.conf in your worldpath
+--
+
+local config = {
+	settings = Settings(core.get_worldpath() .. DIR_DELIM .. "mtt.conf"):to_table(),
+	register_defaults = function(self, defaults)
+		local settings = self.settings
+		for key in pairs(defaults) do
+			if not settings[key] then
+				settings[key] = defaults[key]
+			end
+		end
+	end,
+	get = function(self, key)
+		return core.setting_get("mtt_" .. key) or self.settings[key]
+	end,
+}
+mtt.config = setmetatable(config, {
+	__index = function(table, key)
+		return table:get(key)
+	end
+})
+
+-- register own config defaults
+--config:register_defaults({})
+
+
 ---
 -- constants, especially provided by the engine
 -- update with the engine, but leave them otherwise intact
