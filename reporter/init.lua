@@ -121,12 +121,22 @@ local detailed_list_formatter = formatter:new{
 	end,
 
 	["Specification End"] = function(self, event)
+		self.cases_passed = self.cases_passed + event.passed
+		self.cases_failed = self.cases_failed + event.failed
 		local summary = string.format("%s (%d/%d)", event.failed == 0 and "ok" or "fail", event.passed, event.total)
 		self:write_ln("=========================================================[ %16s ]===", summary)
 	end,
 
+	["Suite Start"] = function(self, event)
+		self.cases_passed = 0
+		self.cases_failed = 0
+	end,
+
 	["Suite End"] = function(self, event)
-		self:write_ln("***** Run tests of %d specifications (%d passed, %d failed) *****", event.total, event.passed, event.failed)
+		local cases_total = self.cases_passed + self.cases_failed
+		self:write_ln("***** Run %d tests (%d passed, %d failed) of %d specifications (%d passed, %d failed) *****",
+			cases_total, self.cases_passed, self.cases_failed,
+			event.total, event.passed, event.failed)
 	end,
 }
 
