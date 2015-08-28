@@ -154,7 +154,7 @@ mtt.Specification = Testable {
 		self:_start()
 		local result = self:try(self.func)
 
-		if self.before then self.before() end
+		if self.setup then self.setup() end
 		local ok, fail = 0, 0
 		for _, testcase in pairs(self.testcases) do
 			testrunner.ctx_case = testcase
@@ -169,7 +169,7 @@ mtt.Specification = Testable {
 		testrunner.ctx_case = nil
 
 		if fail > 0 then self.success = false end
-		if self.after then self.after() end
+		if self.teardown then self.teardown() end
 
 		self:_end({passed = ok, failed = fail})
 		self:report()
