@@ -54,7 +54,13 @@ mtt.Testable = {
 	end,
 	fail = function(self, err)
 		self.success = false
-		self:add_event(mtt.Error(self, err)):report()
+		self:add_event(mtt.Error(self, err))
+		self:report()
+	end,
+	report = function(self)
+		for index, event in ipairs(self.events) do
+			event:report()
+		end
 	end,
 	try = function(self, func, ...)
 		if not self.success then return end
@@ -72,7 +78,6 @@ mtt.TestCase = mtt.Testable:new {
 		local step = Step(conjunction, description)
 		self:add_event(step)
 		self.ctx_step = step
-		step:report()
 		return step
 	end,
 	run = function(self)
