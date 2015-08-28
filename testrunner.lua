@@ -10,8 +10,10 @@ local Event = {
 	type = "Unknown",
 	new = function(self, object)
 		object = object or {}
-		object.__index = self
-		return setmetatable(object, object)
+		local meta = object.meta or {}
+		meta.__index = self
+		object.meta = nil
+		return setmetatable(object, meta)
 	end,
 	report = function(self) report:event(self) end,
 }
@@ -22,21 +24,25 @@ mtt.Event = setmetatable(Event, {
 
 local Step = Event {
 	type = "Step",
-	__tostring = function (self) return string.format("%s %s", self.conjunction, self.description) end,
-	__call = function(table, conjunction, description)
-		return table:new { conjunction=conjunction, description=description, }
-	end,
+	meta = {
+		__tostring = function (self) return string.format("%s %s", self.conjunction, self.description) end,
+		__call = function(self, conjunction, description)
+			return self:new { conjunction=conjunction, description=description, }
+		end,
+	},
 }
 mtt.Step = Step
 
 mtt.Error = Event {
 	type = "Error",
-	__call = function(table, context, err)
-		return table:new { context=context, message=tostring(err), }
-	end,
+	meta = {
+		__call = function(self, context, err)
+			return self:new { context=context, message=tostring(err), }
+		end,
+	},
 }
 
-mtt.Testable = {
+local Testable = {
 	description=nil,
 	func= function() error("no test defined") end,
 	success = nil,
@@ -44,8 +50,10 @@ mtt.Testable = {
 	new = function(self, object)
 		object = object or {}
 		object.events = {}
-		self.__index = self
-		return setmetatable(object, self)
+		return setmetatable(object, {
+			__index = self,
+			__tostring = self.__tostring,
+		})
 	end,
 	add_event = function(self, event)
 		table.insert(self.events, event)
@@ -71,8 +79,12 @@ mtt.Testable = {
 		return result, err
 	end
 }
+mtt.Testable = setmetatable(Testable, {
+	__tostring = Testable.__tostring,
+	__call = function(self, object) return self:new(object) end,
+})
 
-mtt.TestCase = mtt.Testable:new {
+mtt.TestCase = Testable {
 	type = "TestCase",
 	step = function(self, conjunction, description)
 		local step = Step(conjunction, description)
@@ -88,7 +100,7 @@ mtt.TestCase = mtt.Testable:new {
 	end,
 }
 
-mtt.Specification = mtt.Testable:new {
+mtt.Specification = Testable {
 	type = "Specification",
 	new = function(self, object)
 		object = mtt.Testable.new(self, object)
