@@ -1,8 +1,8 @@
-local original_protection = minetest.is_protected
+local original_protection = core.is_protected
 
 local protection_states = {}
 
-minetest.is_protected = function(pos, name)
+core.is_protected = function(pos, name)
 	local state = protection_states[name]
 	if state ~= nil then -- do check for nil not for false!
 		return state
@@ -10,7 +10,7 @@ minetest.is_protected = function(pos, name)
 	return original_protection(pos, name)
 end
 
-minetest.register_chatcommand("protect", {
+core.register_chatcommand("protect", {
 	description = "set protection against actions by the calling player",
 	params = "[on|off|default]",
 	privs = {interact=true},

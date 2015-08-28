@@ -1,4 +1,4 @@
-local string, table, insert, core = string, table, table.insert, core
+local format, table, insert, core = string.format, table, table.insert, core
 
 local tabs = {}
 
@@ -14,12 +14,12 @@ insert(tabs, {
 
 		local cells = ""
 		for key, value in pairs(fields) do
-			cells = string.format("%s,%s,%s", cells, core.formspec_escape(key), core.formspec_escape(value))
+			cells = format("%s,%s,%s", cells, core.formspec_escape(key), core.formspec_escape(value))
 		end
 
 		return "tablecolumns[text;text]" ..
-			string.format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
-			("button[%f,%f;2,1;raw_metadata;Raw Table]"):format(fs_width - 2, fs_height - 0.7 * 2 - 0.3)
+			format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
+			format("button[%f,%f;2,1;raw_metadata;Raw Table]", fs_width - 2, fs_height - 0.7 * 2 - 0.3)
 	end
 })
 
@@ -32,38 +32,37 @@ insert(tabs, {
 		local inventory_lists = inv:get_lists()
 		local cells = ""
 		for name, list in pairs(inventory_lists) do
-			cells = string.format("%s,0,%s,(Size %d),,", cells,
-				core.formspec_escape(name), #list)
+			cells = format("%s,0,%s,(Size %d),,", cells, core.formspec_escape(name), #list)
 
 			for _, stack in ipairs(list) do
 				local count = stack:get_count()
 				if count == 0 then
 					cells = cells .. ",1,-,<empty>,,"
 				else
-					cells = string.format("%s,1,%d,%s,%s,%s", cells,
+					cells = format("%s,1,%d,%s,%s,%s", cells,
 						count, stack:get_name(), stack:get_wear(), core.formspec_escape(stack:get_metadata()))
 				end
 			end
 		end
 
 		return "tablecolumns[indent;text;text;text;text]" ..
-			string.format("table[0,0;%f,%f;invtable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2))
+			format("table[0,0;%f,%f;invtable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2))
 	end
 })
 
 local function concat_kv_row(cells, level, key, value)
 	local type = type(value)
 	if type == "string" then
-		value = value:format("%q")
+		value = format("%q", value)
 	elseif type == "table" then
-		cells = string.format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
+		cells = format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
 		for key, value in pairs(value) do
 			cells = concat_kv_row(cells,level + 1,key,value)
 		end
 		return cells
 	end
 
-	return string.format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
+	return format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
 end
 
 insert(tabs, {
@@ -81,8 +80,8 @@ insert(tabs, {
 		end
 
 		return "tablecolumns[indent;text;text]" ..
-			string.format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
-			("button[%f,%f;2,1;raw_nodedef;Raw Table]"):format(fs_width - 2, fs_height - 0.7 * 2 - 0.3)
+			format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
+			format("button[%f,%f;2,1;raw_nodedef;Raw Table]", fs_width - 2, fs_height - 0.7 * 2 - 0.3)
 	end
 })
 
@@ -95,24 +94,24 @@ captions = captions:sub(2)
 local function create_inspector_formspec(pos, def)
 	local def = def or {}
 	local node = core.get_node(pos)
-	local formspec = { ("size[%d,%d]"):format(fs_width, fs_height) }
+	local formspec = { format("size[%d,%d]", fs_width, fs_height) }
 
 	if def.tmp_tab then
-		insert(formspec, ("tabheader[0,0;tab;%s,%s;%s;true;true]"):format(captions, def.tmp_tab, #tabs + 1))
+		insert(formspec, format("tabheader[0,0;tab;%s,%s;%s;true;true]", captions, def.tmp_tab, #tabs + 1))
 	elseif def.tab_index then
-		insert(formspec, ("tabheader[0,0;tab;%s;%s;true;true]"):format(captions, def.tab_index))
+		insert(formspec, format("tabheader[0,0;tab;%s;%s;true;true]", captions, def.tab_index))
 	end
 
-	insert(formspec, ("item_image[%f,0;1,1;%s]"):format(fs_width - side_width, node.name))
-	insert(formspec, ("field[%f,0.3;2,1;position;;%d,%d,%d]"):format(fs_width - side_width + 1.3, pos.x, pos.y, pos.z))
-	insert(formspec, ("label[%f,1;%s]"):format(fs_width - side_width, node.name))
-	insert(formspec, ("label[%f,1.3;Raw: %d (%d, %d)]"):format(fs_width - side_width, core.get_content_id(node.name), node.param1, node.param2))
+	insert(formspec, format("item_image[%f,0;1,1;%s]", fs_width - side_width, node.name))
+	insert(formspec, format("field[%f,0.3;2,1;position;;%d,%d,%d]", fs_width - side_width + 1.3, pos.x, pos.y, pos.z))
+	insert(formspec, format("label[%f,1;%s]", fs_width - side_width, node.name))
+	insert(formspec, format("label[%f,1.3;Raw: %d (%d, %d)]", fs_width - side_width, core.get_content_id(node.name), node.param1, node.param2))
 
 	if def.content then
 		insert(formspec, def.content)
 	end
 
-	insert(formspec, ("button_exit[%f,%f;2,1;close;Close]"):format(fs_width - 2, fs_height - 0.7))
+	insert(formspec, format("button_exit[%f,%f;2,1;close;Close]", fs_width - 2, fs_height - 0.7))
 
 	return table.concat(formspec)
 end
@@ -121,7 +120,7 @@ local function show_raw_table_data(playername, pos, table)
 	local text = core.formspec_escape(dump(table or {}))
 	core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
 		tmp_tab = "Raw Metadata",
-		content = ("textarea[0.3,0;%f,%f;text;;%s]"):format(fs_width - side_width, fs_height, text),
+		content = format("textarea[0.3,0;%f,%f;text;;%s]", fs_width - side_width, fs_height, text),
 	}))
 end
 
@@ -173,4 +172,3 @@ core.register_tool("mod_test:inspector", {
 		switch_tab(placer:get_player_name(), 1, pos)
 	end,
 })
-core.register_alias("mod_test:metadata_inspector", "mod_test:inspector")
