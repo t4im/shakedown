@@ -81,7 +81,8 @@ insert(tabs, {
 
 		return "tablecolumns[indent;text;text]" ..
 			format("table[0,0;%f,%f;metatable;%s;]", fs_width - side_width - .3, fs_height, cells:sub(2)) ..
-			format("button[%f,%f;2,1;raw_nodedef;Raw Table]", fs_width - 2, fs_height - 0.7 * 2 - 0.3)
+			format("button[%f,%f;2,1;raw_nodedef;Raw Table]", fs_width - 2, fs_height - 0.7 - 1) ..
+			format("button[%f,%f;2,1;aliassearch;Aliases]", fs_width - 2, fs_height - 0.7 - 2)
 	end
 })
 
@@ -114,6 +115,18 @@ local function create_inspector_formspec(pos, def)
 	insert(formspec, format("button_exit[%f,%f;2,1;close;Close]", fs_width - 2, fs_height - 0.7))
 
 	return table.concat(formspec)
+end
+
+local function create_aliassearch_formspec(pos)
+	local node_name = core.get_node(pos).name
+
+	local list = node_name
+	for name, convert_to in pairs(core.registered_aliases) do
+		if convert_to == node_name then
+			list = format("%s,%s", list, name)
+		end
+	end
+	return format("textlist[0,0;%f,%f;aliastable;%s;]", fs_width - side_width - .3, fs_height, list)
 end
 
 local function show_raw_table_data(playername, pos, table)
@@ -151,6 +164,11 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 		show_raw_table_data(playername, pos, meta:to_table())
 	elseif fields.raw_nodedef then
 		show_raw_table_data(playername, pos, core.registered_nodes[node.name])
+	elseif fields.aliassearch then
+		core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
+			tmp_tab = "Aliases",
+			content = create_aliassearch_formspec(pos),
+		}))
 	end
 
 	return true
