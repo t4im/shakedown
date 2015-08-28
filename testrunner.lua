@@ -1,4 +1,4 @@
-local table, mtt, reporter, report = table, mtt, mtt.reporter, mtt.reporter.formatter
+local table, string, mtt, reporter, report = table, string, mtt, mtt.reporter, mtt.reporter.formatter
 
 local specifications = {}
 mtt.specifications = specifications
@@ -6,18 +6,55 @@ local testrunner = {}
 mtt.testrunner = testrunner
 
 -- classes
+local Event = {
+	type = "Unknown",
+	new = function(self, object)
+		object = object or {}
+		object.__index = self
+		return setmetatable(object, object)
+	end,
+	report = function(self) report:event(self) end,
+}
+mtt.Event = setmetatable(Event, {
+	__tostring = function(self) string.format("%s Event: %s", self.type, self.description or dump(self)) end,
+	__call = function(self, object) return self:new(object) end,
+})
+
+local Step = Event {
+	type = "Step",
+	__tostring = function (self) return string.format("%s %s", self.conjunction, self.description) end,
+	__call = function(table, conjunction, description)
+		return table:new { conjunction=conjunction, description=description, }
+	end,
+}
+mtt.Step = Step
+
+mtt.Error = Event {
+	type = "Error",
+	__call = function(table, context, err)
+		return table:new { context=context, message=tostring(err), }
+	end,
+}
+
 mtt.Testable = {
 	description=nil,
 	func= function() error("no test defined") end,
 	success = nil,
 	__tostring = function (self) return self.description end,
 	new = function(self, object)
+		object = object or {}
+		object.events = {}
 		self.__index = self
-		return setmetatable(object or {}, self)
+		return setmetatable(object, self)
+	end,
+	add_event = function(self, event)
+		table.insert(self.events, event)
+		self.last_event = event
+		return event
 	end,
 	fail = function(self, err)
 		self.success = false
-		report: error(tostring(err))
+		self:add_event(mtt.Error(self, err)):report()
 	end,
 	try = function(self, func, ...)
 		if not self.success then return end
@@ -29,7 +66,15 @@ mtt.Testable = {
 	end
 }
 
-mtt.TestCase = mtt.Testable:new{
+mtt.TestCase = mtt.Testable:new {
+	type = "TestCase",
+	step = function(self, conjunction, description)
+		local step = Step(conjunction, description)
+		self:add_event(step)
+		self.ctx_step = step
+		step:report()
+		return step
+	end,
 	run = function(self)
 		self.success = true
 		report: testcase(self.description)
@@ -38,15 +83,12 @@ mtt.TestCase = mtt.Testable:new{
 	end,
 }
 
-mtt.Specification = mtt.Testable:new{
+mtt.Specification = mtt.Testable:new {
+	type = "Specification",
 	new = function(self, object)
 		object = mtt.Testable.new(self, object)
 		object.testcases = {}
 		return object
-	end,
-	fail = function(self, err)
-		self.success = false
-		report: spec_error(tostring(err))
 	end,
 	run = function(self)
 		self.success = true

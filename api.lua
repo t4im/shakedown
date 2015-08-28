@@ -1,4 +1,4 @@
-local mtt, testrunner, report = mtt, mtt.testrunner, mtt.reporter.formatter
+local mtt, testrunner = mtt, mtt.testrunner
 --
 -- assertions
 --
@@ -26,9 +26,9 @@ local abstract_test_env = {
 mtt.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
 local testcase_env = {
-	Given = function(description) report: step("Given", description) end,
-	When = function(description) report: step("When", description) end,
-	Then = function(description) report: step("Then", description) end,
+	Given = function(description) return testrunner.ctx_case:step("Given", description) end,
+	When = function(description) return testrunner.ctx_case:step("When", description) end,
+	Then = function(description) return testrunner.ctx_case:step("Then", description) end,
 }
 mtt.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
 
