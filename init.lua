@@ -18,6 +18,7 @@ dofile(modpath .. "/lib/init.lua")
 
 -- the mtt engine itself
 dofile(modpath .. "/reporter/init.lua")
+dofile(modpath .. "/events.lua")
 dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/api.lua")
 
