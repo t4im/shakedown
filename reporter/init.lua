@@ -1,6 +1,7 @@
 local string, table, core, mtt = string, table, core, mtt
 local reporter = {
 	print_out = function(level, msg)
+		if not msg then return end
 		if level then
 			core.log(level, msg)
 			core.chat_send_all(level .. ": " .. msg)
@@ -37,59 +38,95 @@ local formatter = {
 		if (...) then
 			table.insert(self.out, string.format(text, ...))
 		else
-			table.insert(self.out, text or "\n")
+			table.insert(self.out, text)
 		end
+	end,
+	write_ln = function(self, text, ...)
+		if text then
+			self:write(text, ...)
+		end
+		table.insert(self.out, "\n")
 	end,
 	flush = function(self)
 		table.insert(self.out, "\n")
-		local text = table.concat(self.out, "\n")
+		local text = table.concat(self.out)
 		self.out = {}
+		-- avoid empty lines
+		if text:trim() == "" then return nil end
 		return text
 	end,
 
-	summary = function() error("no report format defined") end,
-	specification = function(self, description) end,
-	spec_summary = function(self, ok, fail) end,
-	testcase = function(self, description) end,
-
 	["Unknown Event"] = function(self, event) error("unknown event fired: " .. dump(event)) end,
+	["Generic Error"] = function(self, event) self:write_ln(event.message) end,
 
 	event = function(self, event, ...)
 		self[event.type](self, event, ...)
 	end,
 }
 
-local detailed_list_formatter = formatter:new{
-	["Specification Error"] = function(self, event)
-		self:write("[!] fails during setup:\n%s", event.message)
-	end,
-
-	["Error"] = function(self, event)
-		if event.context and event.context.type then
-			local subformatter = self[string.format("%s Error", event.context.type)]
+local function add_ctx_switch(name)
+	local generic_key = "Generic " .. name
+	formatter[name] = function(self, event)
+		local ctx = event.context
+		if ctx and ctx.type then
+			local subformatter = self[string.format("%s %s", ctx.type, name)]
 			if subformatter then
 				return subformatter(self, event)
 			end
 		end
-		self:write("[!] but fails with:\n%s", event.message)
+		self[generic_key](self, event)
+	end
+
+	if not formatter[generic_key] then
+		formatter[generic_key] = function(self, event) end
+	end
+end
+add_ctx_switch("Error")
+add_ctx_switch("Start")
+add_ctx_switch("End")
+
+local detailed_list_formatter = formatter:new{
+	["Run"] = function(self, event)
+		local target = event.target
+		local skip_steps = target.success
+
+		for index, target_event in ipairs(target.events) do
+			if not skip_steps or target_event.type ~= "Step" then
+				self:event(target_event)
+			end
+		end
+	end,
+
+	["Specification Error"] = function(self, event)
+		self:write_ln("[!] fails during setup:\n%s", event.message)
+	end,
+
+	["Generic Error"] = function(self, event)
+		self:write_ln("[!] but fails with:\n%s", event.message)
 	end,
 
 	["Step"] = function(self, event)
-		self:write("  + %s %s", event.conjunction, event.description)
+		self:write_ln("  + %s %s", event.conjunction, event.description)
 	end,
 
-	summary = function(self, ok, fail)
-		self:write("***** Run tests of %d specifications (%d ok, %d failed) *****", ok+fail, ok, fail)
+	["TestCase Start"] = function(self, event)
+		self:write_ln("- %s ", event.context.description)
 	end,
-	specification = function(self, description)
-		self:write("\n===[ %70s ]===", description)
+
+	["TestCase End"] = function(self, event)
 	end,
-	spec_summary = function(self, ok, fail)
-		local summary = string.format("%s (%d/%d)", fail == 0 and "ok" or "fail", ok, ok+fail)
-		self:write("=========================================================[ %16s ]===", summary)
+
+	["Specification Start"] = function(self, event)
+		self:write_ln("\n===[ %70s ]===", event.context.description)
 	end,
-	testcase = function(self, description)
-		self:write("- %s", description)
+
+	["Specification End"] = function(self, event)
+		local summary = string.format("%s (%d/%d)", event.failed == 0 and "ok" or "fail", event.passed, event.total)
+		self:write_ln("=========================================================[ %16s ]===", summary)
+	end,
+
+	["Suite End"] = function(self, event)
+		self:write_ln("***** Run tests of %d specifications (%d passed, %d failed) *****", event.total, event.passed, event.failed)
 	end,
 }
 

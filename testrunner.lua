@@ -1,4 +1,4 @@
-local table, string, mtt, reporter, report = table, string, mtt, mtt.reporter, mtt.reporter.formatter
+local table, string, mtt, reporter = table, string, mtt, mtt.reporter
 
 local specifications = {}
 mtt.specifications = specifications
@@ -15,7 +15,7 @@ local Event = {
 		object.meta = nil
 		return setmetatable(object, meta)
 	end,
-	report = function(self) report:event(self) end,
+	report = function(self) reporter.formatter:event(self) end,
 }
 mtt.Event = setmetatable(Event, {
 	__tostring = function(self) string.format("%s Event: %s", self.type, self.description or dump(self)) end,
@@ -42,6 +42,40 @@ mtt.Error = Event {
 	},
 }
 
+mtt.Start = Event {
+	type = "Start",
+	meta = {
+		__call = function(self, context)
+			return self:new { context=context, }
+		end,
+	},
+}
+
+mtt.End = Event {
+	type = "End",
+	meta = {
+		__call = function(self, context, report)
+			local passed, failed = report.passed or 0, report.failed or 0
+			return self:new {
+				context=context,
+				passed = passed,
+				failed = failed,
+				total = report.total or (passed + failed),
+				verdict = report.verdict or (context.success and "OK" or "FAILED")
+			}
+		end,
+	},
+}
+
+mtt.Run = Event {
+	type = "Run",
+	meta = {
+		__call = function(self, target)
+			return self:new { target = target, }
+		end,
+	},
+}
+
 local Testable = {
 	description=nil,
 	func= function() error("no test defined") end,
@@ -60,10 +94,18 @@ local Testable = {
 		self.last_event = event
 		return event
 	end,
-	fail = function(self, err)
+	_start = function(self)
+		-- lets start positive, sadness will come on its own
+		self.success = true
+		self:add_event(mtt.Start(self))
+	end,
+	_end = function(self, report)
+		self:add_event(mtt.End(self, report or {}))
+	end,
+	_fail = function(self, err)
+		-- :'-(
 		self.success = false
 		self:add_event(mtt.Error(self, err))
-		self:report()
 	end,
 	report = function(self)
 		for index, event in ipairs(self.events) do
@@ -74,9 +116,9 @@ local Testable = {
 		if not self.success then return end
 		local result, err = pcall(func, ...)
 		if err then
-			self:fail(err)
+			self:_fail(err)
 		end
-		return result, err
+		return result
 	end
 }
 mtt.Testable = setmetatable(Testable, {
@@ -93,9 +135,10 @@ mtt.TestCase = Testable {
 		return step
 	end,
 	run = function(self)
-		self.success = true
-		report: testcase(self.description)
-		local result, err = self:try(self.func)
+		self:_start()
+		local result = self:try(self.func)
+		-- passed steps are atm all events minus the start event, if nothing happened
+		self:_end({ passed=#(self.events)-1 })
 		return result
 	end,
 }
@@ -108,9 +151,8 @@ mtt.Specification = Testable {
 		return object
 	end,
 	run = function(self)
-		self.success = true
-		report: specification(self.description)
-		local result, err = self:try(self.func)
+		self:_start()
+		local result = self:try(self.func)
 
 		if self.before then self.before() end
 		local ok, fail = 0, 0
@@ -122,13 +164,15 @@ mtt.Specification = Testable {
 			else
 				fail = fail + 1
 			end
+			self:add_event(mtt.Run(testcase))
 		end
 		testrunner.ctx_case = nil
 
 		if fail > 0 then self.success = false end
 		if self.after then self.after() end
 
-		report: spec_summary(ok, fail)
+		self:_end({passed = ok, failed = fail})
+		self:report()
 		reporter.flush(self.success and "action" or "error")
 		return result
 	end,
@@ -145,6 +189,8 @@ mtt.Specification = Testable {
 -- running
 function mtt.testrunner:runAll()
 	local ok, fail = 0, 0
+	mtt.Start({ type = "Suite" }):report()
+	reporter.flush()
 	for _, spec in pairs(specifications) do
 		self.ctx_spec = spec
 		spec:run()
@@ -155,6 +201,6 @@ function mtt.testrunner:runAll()
 		end
 	end
 	self.ctx_spec = nil
-	report: summary(ok, fail)
+	mtt.End({ type = "Suite" }, {passed = ok, failed = fail}):report()
 	reporter.flush()
 end
