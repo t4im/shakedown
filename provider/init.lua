@@ -5,6 +5,7 @@ mtt.provider = provider
 
 local path = mtt.modpath ..  "/provider"
 --dofile(path .. "/registrations.lua")
+dofile(path .. "/voxel.lua")
 
 --[[ since we can't run selectivly yet, we need to comment this out
 describe("provider.entries(table, key_matcher, value_matcher)", function()
