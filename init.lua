@@ -2,6 +2,7 @@ local modpath = minetest.get_modpath(minetest.get_current_modname())
 dofile(modpath .. "/strict.lua")
 dofile(modpath .. "/protection.lua")
 dofile(modpath .. "/inspector.lua")
+dofile(modpath .. "/node_placer.lua")
 
 minetest.register_on_newplayer(function(player)
 	local inventory = player:get_inventory()
