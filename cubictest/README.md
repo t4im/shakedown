@@ -1,10 +1,11 @@
 # cubictest
-
 The behavior driven testing framework for minetest.
+
+![test³ → coretest ⨉ smoketest ⨉ modtest](cubictest_logo.png)
 
 > cubictest /ˈkjuː.bɪktɛst/ (noun):
 >   1. voxel behavior examination
->   2. behavior examination of third degree, order or power; e.g. test³
+>   2. behavior examination of third degree, order or power
 
 ## License
 
