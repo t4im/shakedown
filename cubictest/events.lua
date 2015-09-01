@@ -1,7 +1,7 @@
-local mtt, reporter = mtt, mtt.reporter
+local cubictest, reporter = cubictest, cubictest.reporter
 
 local events = {}
-mtt.events = events
+cubictest.events = events
 
 local Event = {
 	type = "Unknown",

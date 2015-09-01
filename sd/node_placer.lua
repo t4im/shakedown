@@ -19,7 +19,7 @@ core.register_craftitem(core.get_current_modname() .. ":unknown_node", {
 		end
 
 		core.log("action", format("%s places unknown node at %s", playername, core.pos_to_string(pos)))
-		mtt.provider.map_content(pos, mtt.constants.CONTENT_UNKNOWN)
+		cubictest.provider.map_content(pos, cubictest.constants.CONTENT_UNKNOWN)
 
 		return itemstack
 	end,

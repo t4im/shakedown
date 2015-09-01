@@ -1,9 +1,9 @@
 local provider = {
 
 	}
-mtt.provider = provider
+cubictest.provider = provider
 
-local path = mtt.modpath ..  "/provider"
+local path = cubictest.modpath ..  "/provider"
 --dofile(path .. "/registrations.lua")
 dofile(path .. "/voxel.lua")
 
@@ -39,7 +39,7 @@ describe("provider.entries(table, key_matcher, value_matcher)", function()
 
 		When("iterating through it with a string value matcher set")
 		local test_copy = {}
-		for key, var in  provider.entries(test_table, nil, mtt.match.is_string()) do
+		for key, var in  provider.entries(test_table, nil, cubictest.match.is_string()) do
 			test_copy[key] = var
 		end
 

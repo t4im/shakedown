@@ -1,4 +1,5 @@
 local format, table, insert, core = string.format, table, table.insert, core
+local modname = core.get_current_modname()
 
 local tabs = {}
 
@@ -129,9 +130,10 @@ local function create_aliassearch_formspec(pos)
 	return format("textlist[0,0;%f,%f;aliastable;%s;]", fs_width - side_width - .3, fs_height, list)
 end
 
+local formspec_name = modname .. ":inspect"
 local function show_raw_table_data(playername, pos, table)
 	local text = core.formspec_escape(dump(table or {}))
-	core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
+	core.show_formspec(playername, formspec_name, create_inspector_formspec(pos, {
 		tmp_tab = "Raw Metadata",
 		content = format("textarea[0.3,0;%f,%f;text;;%s]", fs_width - side_width, fs_height, text),
 	}))
@@ -139,14 +141,14 @@ end
 
 local function switch_tab(playername, tab_index, pos, ...)
 	local node = core.get_node(pos)
-	core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
+	core.show_formspec(playername, formspec_name, create_inspector_formspec(pos, {
 		tab_index = tab_index,
 		content = tabs[tab_index]:formspec(pos, ...),
 	}))
 end
 
 core.register_on_player_receive_fields(function(player, formname, fields)
-	if formname ~= "mod_test:inspect" then return end
+	if formname ~= formspec_name then return end
 
 	local playername = player:get_player_name()
 	local pos = fields.position and core.string_to_pos(fields.position) or {x=0, y=0, z=0}
@@ -165,7 +167,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 	elseif fields.raw_nodedef then
 		show_raw_table_data(playername, pos, core.registered_nodes[node.name])
 	elseif fields.aliassearch then
-		core.show_formspec(playername, "mod_test:inspect", create_inspector_formspec(pos, {
+		core.show_formspec(playername, formspec_name, create_inspector_formspec(pos, {
 			tmp_tab = "Aliases",
 			content = create_aliassearch_formspec(pos),
 		}))
@@ -174,9 +176,9 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 	return true
 end)
 
-core.register_tool("mod_test:inspector", {
+core.register_tool(modname .. ":inspector", {
 	description = "metadata inspector",
-	inventory_image = "mtt_magnifying_glass.png",
+	inventory_image = "sd_magnifying_glass.png",
 	range = 16,
 	liquids_pointable = true,
 	on_use = function(itemstack, user, pointed_thing)

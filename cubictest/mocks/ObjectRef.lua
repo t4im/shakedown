@@ -1,4 +1,4 @@
-local mocks = mtt.mocks
+local mocks = cubictest.mocks
 local nop, fixed = mocks.nop, mocks.fixed
 local setter, getter, multi_setter, multi_getter = mocks.setter, mocks.getter, mocks.multi_setter, mocks.multi_getter
 ---
@@ -26,7 +26,7 @@ mocks.ObjectRef = {
 	punch = nop,
 	--* `right_click(clicker)`; `clicker` is another `ObjectRef`
 	--* `get_hp()`: returns number of hitpoints (2 * number of hearts)
-	get_hp = getter("hp", mtt.constants.PLAYER_MAX_HP),
+	get_hp = getter("hp", cubictest.constants.PLAYER_MAX_HP),
 	--* `set_hp(hp)`: set number of hitpoints (2 * number of hearts)
 	get_hp = setter("hp"),
 
@@ -131,7 +131,7 @@ mocks.Player = {
 	set_look_yaw = setter("look_yaw"),
 
 	--* `get_breath()`: returns players breath
-	get_breath = getter("breath", mtt.constants.PLAYER_MAX_BREATH),
+	get_breath = getter("breath", cubictest.constants.PLAYER_MAX_BREATH),
 	--* `set_breath(value)`: sets players breath
 	--     * values:
 	--        * `0`: player is drowning,

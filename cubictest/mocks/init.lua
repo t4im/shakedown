@@ -41,7 +41,7 @@ function mocks.multi_getter(name, ...)
 	end
 end
 
-mtt.mocks = mocks
+cubictest.mocks = mocks
 
-local path = mtt.modpath ..  "/mocks"
+local path = cubictest.modpath ..  "/mocks"
 dofile(path .. "/ObjectRef.lua")

@@ -1,12 +1,12 @@
-local core = minetest
-local c_air = minetest.get_content_id("air")
+local core = core
+local c_air = core.get_content_id("air")
 local c_stone = core.get_content_id("default:stone")
 local c_dirt_with_grass = core.get_content_id("default:dirt_with_grass")
 local c_steelblock = core.get_content_id("default:steelblock")
-local c_water = minetest.get_content_id("default:water_source")
-local c_lava = minetest.get_content_id("default:lava_source")
-local c_desert_sand = minetest.get_content_id("default:desert_sand")
-local mapgened_chunk_lenghts = minetest.get_mapgen_params().chunksize
+local c_water = core.get_content_id("default:water_source")
+local c_lava = core.get_content_id("default:lava_source")
+local c_desert_sand = core.get_content_id("default:desert_sand")
+local mapgened_chunk_lenghts = core.get_mapgen_params().chunksize
 local biome_noise = {
 	seed = 179424,
 	octaves = 2,
@@ -26,7 +26,7 @@ local function select_biome_content(noise)
 	return c_dirt_with_grass
 end
 
-minetest.register_on_generated(function(minp, maxp, blockseed)
+core.register_on_generated(function(minp, maxp, blockseed)
 	local miny = minp.y
 	if miny > 2 then -- don't bother with air
 		return
@@ -70,6 +70,6 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 	vm:write_to_map(data)
 end)
 
-minetest.register_on_newplayer(function(player)
+core.register_on_newplayer(function(player)
 	player:setpos({x=0,y=2,z=0})
 end)

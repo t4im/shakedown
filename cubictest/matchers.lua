@@ -1,5 +1,5 @@
-local mtt, luassert = mtt, mtt.luassert
-mtt.match = mtt.luassert_match
+local cubictest, luassert = cubictest, cubictest.luassert
+cubictest.match = cubictest.luassert_match
 
 luassert:register("matcher", "in_creative_inventory", function(state, arguments, level)
 	return function(item)

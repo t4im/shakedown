@@ -1,4 +1,4 @@
-local modpath = mtt.modpath
+local modpath = cubictest.modpath
 
 -- load luassert assertions
 package.path =
@@ -6,5 +6,5 @@ package.path =
 	modpath .. "/?.lua;" ..
 	package.path
 
-mtt.luassert = require("luassert")
-mtt.luassert_match = require("luassert.match")
+cubictest.luassert = require("luassert")
+cubictest.luassert_match = require("luassert.match")

@@ -1,6 +1,6 @@
-local provider = mtt.provider
-local MAP_BLOCKSIZE = mtt.constants.MAP_BLOCKSIZE
-local CONTENT_UNKNOWN = mtt.constants.CONTENT_UNKNOWN
+local provider = cubictest.provider
+local MAP_BLOCKSIZE = cubictest.constants.MAP_BLOCKSIZE
+local CONTENT_UNKNOWN = cubictest.constants.CONTENT_UNKNOWN
 
 local function to_relative(pos)
 	return pos.x % MAP_BLOCKSIZE, pos.y % MAP_BLOCKSIZE, pos.z % MAP_BLOCKSIZE

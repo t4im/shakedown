@@ -1,11 +1,11 @@
 local table, string = table, string
-local mtt, reporter, events = mtt, mtt.reporter, mtt.events
+local cubictest, reporter, events = cubictest, cubictest.reporter, cubictest.events
 local Start, End, Step, Error, Run = events.Start, events.End, events.Step, events.Error, events.Run
 
 local specifications = {}
-mtt.specifications = specifications
+cubictest.specifications = specifications
 local testrunner = {}
-mtt.testrunner = testrunner
+cubictest.testrunner = testrunner
 
 -- classes
 
@@ -54,12 +54,12 @@ local Testable = {
 		return result
 	end
 }
-mtt.Testable = setmetatable(Testable, {
+cubictest.Testable = setmetatable(Testable, {
 	__tostring = Testable.__tostring,
 	__call = function(self, object) return self:new(object) end,
 })
 
-mtt.TestCase = Testable {
+cubictest.TestCase = Testable {
 	type = "TestCase",
 	step = function(self, conjunction, description)
 		local step = Step(conjunction, description)
@@ -76,10 +76,10 @@ mtt.TestCase = Testable {
 	end,
 }
 
-mtt.Specification = Testable {
+cubictest.Specification = Testable {
 	type = "Specification",
 	new = function(self, object)
-		object = mtt.Testable.new(self, object)
+		object = cubictest.Testable.new(self, object)
 		object.testcases = {}
 		return object
 	end,
@@ -110,7 +110,7 @@ mtt.Specification = Testable {
 		return result
 	end,
 	register_testcase = function(self, description, func)
-		local testcase = mtt.TestCase:new{
+		local testcase = cubictest.TestCase:new{
 			description = description,
 			func = func
 		}
@@ -120,7 +120,7 @@ mtt.Specification = Testable {
 }
 
 -- running
-function mtt.testrunner:runAll()
+function cubictest.testrunner:runAll()
 	local ok, fail = 0, 0
 	Start({ type = "Suite" }):report()
 	reporter.flush()

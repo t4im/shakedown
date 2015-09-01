@@ -1,4 +1,4 @@
-local string, table, core, mtt = string, table, core, mtt
+local string, table, core, cubictest = string, table, core, cubictest
 local reporter = {
 	print_out = function(level, msg)
 		if not msg then return end
@@ -11,7 +11,7 @@ local reporter = {
 		end
 	end,
 }
-mtt.reporter = reporter
+cubictest.reporter = reporter
 
 reporter.flush = function(level)
 	reporter.print_out(level, reporter.formatter:flush())

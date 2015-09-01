@@ -1,29 +1,29 @@
-local mtt, testrunner = mtt, mtt.testrunner
+local cubictest, testrunner = cubictest, cubictest.testrunner
 --
 -- assertions
 --
-mtt.assert = {
+cubictest.assert = {
 	-- for custom asserts, that aren't available in luassert
 	}
 
 local original_assert = assert
-setmetatable(mtt.assert, {
+setmetatable(cubictest.assert, {
 	-- make all luassert assertions available
-	__index = mtt.luassert,
+	__index = cubictest.luassert,
 	-- behave like the default assert if called as such
 	__call = function(table, ...) return original_assert(...) end
 })
 -- use our assert implementation as an drop-in replacement for all asserts
-assert = mtt.assert
+assert = cubictest.assert
 
 --
 -- test definition language
 --
 local abstract_test_env = {
-	assert = mtt.assert, -- you shall have no other drop-in replacements beside me here
-	match = mtt.match,
+	assert = cubictest.assert, -- you shall have no other drop-in replacements beside me here
+	match = cubictest.match,
 }
-mtt.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
+cubictest.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
 local testcase_env = {
 	Given = function(description) return testrunner.ctx_case:step("Given", description) end,
@@ -32,7 +32,7 @@ local testcase_env = {
 	And = function(description) return testrunner.ctx_case:step("And", description) end,
 	But = function(description) return testrunner.ctx_case:step("But", description) end,
 }
-mtt.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
+cubictest.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
 
 local spec_env = {
 	it = function(description, func)
@@ -53,7 +53,7 @@ local spec_env = {
 	end,
 }
 
-mtt.spec_env = setmetatable(spec_env, {
+cubictest.spec_env = setmetatable(spec_env, {
 	__index = abstract_test_env,
 	__newindex = function(table, key, value)
 		-- alternative way to specify fixtures
@@ -65,19 +65,19 @@ mtt.spec_env = setmetatable(spec_env, {
 
 local suite_env = {
 	describe = function(description, func)
-		setfenv(func, mtt.spec_env)
+		setfenv(func, cubictest.spec_env)
 
-		local spec = mtt.Specification:new{
+		local spec = cubictest.Specification:new{
 			description = description,
 			func = func
 		}
-		table.insert(mtt.specifications, spec)
+		table.insert(cubictest.specifications, spec)
 		return spec
 	end
 }
-mtt.suite_env = setmetatable(suite_env, { __index = abstract_test_env, })
+cubictest.suite_env = setmetatable(suite_env, { __index = abstract_test_env, })
 
 -- globalized api for ease of use
 -- as unit testing framework we can defy the best practice of avoiding globals
 -- to ease the creation of unit tests; we are not supposed to run in production anyway
-describe = mtt.suite_env.describe
+describe = cubictest.suite_env.describe

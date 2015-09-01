@@ -1,10 +1,10 @@
-local modpath = minetest.get_modpath(minetest.get_current_modname())
-mtt = {
+local modpath = core.get_modpath(core.get_current_modname())
+cubictest = {
 	modpath = modpath,
-	print = print, -- to allow mod_test to overwrite this with a custom version
+	print = print, -- to allow another submod to overwrite this with a custom version
 	notify = function(level, msg)
-		minetest.log(level, msg)
-		minetest.chat_send_all(level .. ": " .. msg)
+		core.log(level, msg)
+		core.chat_send_all(level .. ": " .. msg)
 	end,
 }
 
@@ -16,7 +16,7 @@ dofile(modpath .. "/compat.lua")
 -- load external dependencies
 dofile(modpath .. "/lib/init.lua")
 
--- the mtt engine itself
+-- the test framework itself
 dofile(modpath .. "/reporter/init.lua")
 dofile(modpath .. "/events.lua")
 dofile(modpath .. "/testrunner.lua")
@@ -27,6 +27,6 @@ dofile(modpath .. "/matchers.lua")
 dofile(modpath .. "/mocks/init.lua")
 dofile(modpath .. "/provider/init.lua")
 
-minetest.after(1, function ()
-	mtt.testrunner:runAll()
+core.after(1, function ()
+	cubictest.testrunner:runAll()
 end)
