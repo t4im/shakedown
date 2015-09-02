@@ -19,8 +19,8 @@ git clone --recurse-submodules https://github.com/t4im/shakedown.git
 ```
 
 ## Related projects
-* <a href="../profiler/">profiler</a> — Measure and analyze performance of mods.
-* <a href="../coretest/">coretest</a> — cubictest against the minetest api/core.
+* <a href="https://github.com/t4im/profiler/">profiler</a> — Measure and analyze performance of mods.
+* <a href="https://github.com/t4im/coretest/">coretest</a> — cubictest against the minetest api/core.
 
 ## License
 The following applies to all mods of this modpack unless different conditions are stated in their respective directories:
