@@ -63,6 +63,7 @@ local formatter = {
 		self[event.type](self, event, ...)
 	end,
 }
+cubictest.formatter = formatter
 
 local function add_ctx_switch(name)
 	local generic_key = "Generic " .. name
@@ -85,60 +86,12 @@ add_ctx_switch("Error")
 add_ctx_switch("Start")
 add_ctx_switch("End")
 
-local detailed_list_formatter = formatter:new{
-	["Run"] = function(self, event)
-		local target = event.target
-		local skip_steps = target.success
 
-		for index, target_event in ipairs(target.events) do
-			if not skip_steps or target_event.type ~= "Step" then
-				self:event(target_event)
-			end
-		end
-	end,
+cubictest.config:register_defaults({
+	report_format = "simple",
+})
 
-	["Specification Error"] = function(self, event)
-		self:write_ln("[!] fails during setup:\n%s", event.message)
-	end,
+local path = cubictest.modpath ..  "/reporter"
+local report_format = cubictest.config:get("report_format"):match("([a-zA-Z_]+)")
 
-	["Generic Error"] = function(self, event)
-		self:write_ln("[!] but fails with:\n%s", event.message)
-	end,
-
-	["Step"] = function(self, event)
-		self:write_ln("  + %s %s", event.conjunction, event.description)
-	end,
-
-	["TestCase Start"] = function(self, event)
-		self:write_ln("- %s ", event.context.description)
-	end,
-
-	["TestCase End"] = function(self, event)
-	end,
-
-	["Specification Start"] = function(self, event)
-		self:write_ln("\n===[ %70s ]===", event.context.description)
-	end,
-
-	["Specification End"] = function(self, event)
-		self.cases_passed = self.cases_passed + event.passed
-		self.cases_failed = self.cases_failed + event.failed
-		local summary = string.format("%s (%d/%d)", event.failed == 0 and "ok" or "fail", event.passed, event.total)
-		self:write_ln("=========================================================[ %16s ]===", summary)
-	end,
-
-	["Suite Start"] = function(self, event)
-		self.cases_passed = 0
-		self.cases_failed = 0
-	end,
-
-	["Suite End"] = function(self, event)
-		local cases_total = self.cases_passed + self.cases_failed
-		self:write_ln("***** Run %d tests (%d passed, %d failed) of %d specifications (%d passed, %d failed) *****",
-			cases_total, self.cases_passed, self.cases_failed,
-			event.total, event.passed, event.failed)
-	end,
-}
-
-reporter.formatter = detailed_list_formatter:new()
-
+reporter.formatter = dofile(string.format("%s/format_%s.lua", path, report_format or "simple")):new()
