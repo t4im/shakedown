@@ -163,3 +163,23 @@ function cubictest.testrunner:runAll(filter)
 	End({ type = "Suite" }, {passed = ok, failed = fail}):report()
 	reporter.flush()
 end
+
+local usage = "<filter> | all"
+core.register_chatcommand(core.get_current_modname() .. ":run", {
+	description = "Run tests.",
+	params = usage,
+	privs = { server = true },
+	func = function(name,  param)
+		if param == "all" then
+			cubictest.testrunner:runAll()
+			return true
+		end
+
+		local filter = string.match(param, "([^ ]+)")
+		if filter then
+			cubictest.testrunner:runAll(filter)
+		end
+
+		return false, "Usage: " .. usage
+	end,
+})
