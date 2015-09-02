@@ -120,17 +120,23 @@ cubictest.Specification = Testable {
 }
 
 -- running
-function cubictest.testrunner:runAll()
+function cubictest.testrunner:runAll(filter)
+	if type(filter) == "string" then
+		filter = cubictest.match.matches(filter)
+	end
+
 	local ok, fail = 0, 0
 	Start({ type = "Suite" }):report()
 	reporter.flush()
 	for _, spec in pairs(specifications) do
-		self.ctx_spec = spec
-		spec:run()
-		if spec.success then
-			ok = ok + 1
-		else
-			fail = fail + 1
+		if not filter or filter(spec) then
+			self.ctx_spec = spec
+			spec:run()
+			if spec.success then
+				ok = ok + 1
+			else
+				fail = fail + 1
+			end
 		end
 	end
 	self.ctx_spec = nil
