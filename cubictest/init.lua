@@ -27,6 +27,13 @@ dofile(modpath .. "/matchers.lua")
 dofile(modpath .. "/mocks/init.lua")
 dofile(modpath .. "/provider/init.lua")
 
-core.after(1, function ()
-	cubictest.testrunner:runAll()
-end)
+cubictest.config:register_defaults({
+	run_on_startup = false
+})
+
+local startup_run = cubictest.config:get("run_on_startup")
+if startup_run then
+	core.after(1, function ()
+		cubictest.testrunner:runAll(type(startup_run) == "string" and startup_run)
+	end)
+end

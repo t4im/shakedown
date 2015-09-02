@@ -33,9 +33,6 @@ cubictest.config = setmetatable(config, {
 	end
 })
 
--- register own config defaults
---config:register_defaults({})
-
 ---
 -- constants, especially provided by the engine
 -- update with the engine, but leave them otherwise intact
