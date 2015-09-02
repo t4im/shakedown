@@ -69,7 +69,9 @@ local suite_env = {
 
 		local spec = cubictest.Specification:new{
 			description = description,
-			func = func
+			func = func,
+
+			defining_mod = core.get_current_modname(),
 		}
 		table.insert(cubictest.specifications, spec)
 		return spec
