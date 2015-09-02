@@ -79,6 +79,8 @@ mocks.ObjectRef = {
 	get_properties = getter("properties"),
 	--* `is_player()`: returns true for players, false otherwise
 	is_player = fixed(false), -- we override for the player object
+	--* `get_player_name()`: returns `""` if is not a player
+	get_player_name = fixed(""), -- we override for the player object
 }
 
 mocks.LuaEntitySAO = {
@@ -115,7 +117,7 @@ mocks.Player = {
 	is_player = fixed(true),
 
 	--* `get_player_name()`: returns `""` if is not a player
-	get_player_name = getter("player_name"),
+	get_player_name = getter("player_name", "Sam"),
 	--* `get_player_velocity()`: returns `nil` if is not a player otherwise a table {x, y, z} representing the player's instantaneous velocity in nodes/s
 	get_player_velocity = getter("player_velocity", {x=0,y=0,z=0}),
 
