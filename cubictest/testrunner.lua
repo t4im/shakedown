@@ -30,15 +30,29 @@ local Testable = {
 	_start = function(self)
 		-- lets start positive, sadness will come on its own
 		self.success = true
+
+		-- make sure we don't have stale events from the last run
+		self.events = {}
+		self.last_event = nil
+
+		-- then start the event log
 		self:add_event(Start(self))
+
+		-- and set up the testable for its run
+		self:_set_up()
 	end,
 	_end = function(self, report)
+		self:_tear_down()
 		self:add_event(End(self, report or {}))
 	end,
 	_fail = function(self, err)
 		-- :'-(
 		self.success = false
 		self:add_event(Error(self, err))
+	end,
+	run = function(self)
+		self:_start()
+		self:_run()
 	end,
 	report = function(self)
 		for index, event in ipairs(self.events) do
@@ -67,8 +81,11 @@ cubictest.TestCase = Testable {
 		self.ctx_step = step
 		return step
 	end,
-	run = function(self)
-		self:_start()
+	_set_up = function(self)
+	end,
+	_tear_down = function(self)
+	end,
+	_run = function(self)
 		local result = self:try(self.func)
 		-- passed steps are atm all events minus the start event, if nothing happened
 		self:_end({ passed=#(self.events)-1 })
@@ -83,11 +100,17 @@ cubictest.Specification = Testable {
 		object.testcases = {}
 		return object
 	end,
-	run = function(self)
-		self:_start()
-		local result = self:try(self.func)
-
-		if self.setup then self.setup() end
+	_set_up = function(self)
+		if not self.is_set_up then
+			self:try(self.func)
+			self.is_set_up = true
+		end
+		if self.fixture_setup then self.fixture_setup() end
+	end,
+	_tear_down = function(self)
+		if self.fixture_teardown then self.fixture_teardown() end
+	end,
+	_run = function(self)
 		local ok, fail = 0, 0
 		for _, testcase in pairs(self.testcases) do
 			testrunner.ctx_case = testcase
@@ -102,12 +125,9 @@ cubictest.Specification = Testable {
 		testrunner.ctx_case = nil
 
 		if fail > 0 then self.success = false end
-		if self.teardown then self.teardown() end
-
 		self:_end({passed = ok, failed = fail})
 		self:report()
 		reporter.flush(self.success and "action" or "error")
-		return result
 	end,
 	register_testcase = function(self, description, func)
 		local testcase = cubictest.TestCase:new{

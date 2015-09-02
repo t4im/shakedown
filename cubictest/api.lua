@@ -45,11 +45,11 @@ local spec_env = {
 	end,
 	set_up = function(func)
 		setfenv(func, testcase_env)
-		testrunner.ctx_spec.setup = func
+		testrunner.ctx_spec.fixture_setup = func
 	end,
 	tear_down = function(func)
 		setfenv(func, testcase_env)
-		testrunner.ctx_spec.teardown = func
+		testrunner.ctx_spec.fixture_teardown = func
 	end,
 }
 
