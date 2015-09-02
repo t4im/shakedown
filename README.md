@@ -11,6 +11,9 @@
 
 	<dt><a href="./sd/">sd</a></dt>
 	<dd>Shakedown — tools and utilities around developing, testing and debugging mods and minetest games.</dd>
+
+	<dt><a href="./smoketest/">smoketest</a></dt>
+	<dd>Preliminary tests, that detects simple early failures.</dd>
 </dl>
 
 Make sure to get the submodules too:

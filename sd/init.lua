@@ -1,6 +1,5 @@
 local modname = core.get_current_modname()
 local modpath = core.get_modpath(modname)
-dofile(modpath .. "/strict.lua")
 dofile(modpath .. "/protection.lua")
 dofile(modpath .. "/inspector.lua")
 dofile(modpath .. "/node_placer.lua")

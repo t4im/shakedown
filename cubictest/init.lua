@@ -1,7 +1,6 @@
 local modpath = core.get_modpath(core.get_current_modname())
 cubictest = {
 	modpath = modpath,
-	print = print, -- to allow another submod to overwrite this with a custom version
 	notify = function(level, msg)
 		core.log(level, msg)
 		core.chat_send_all(level .. ": " .. msg)
