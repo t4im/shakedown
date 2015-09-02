@@ -4,13 +4,12 @@ local provider = {
 cubictest.provider = provider
 
 local path = cubictest.modpath ..  "/provider"
---dofile(path .. "/registrations.lua")
+dofile(path .. "/registrations.lua")
 dofile(path .. "/voxel.lua")
 
---[[ since we can't run selectivly yet, we need to comment this out
 describe("provider.entries(table, key_matcher, value_matcher)", function()
 	it("iterates like pairs() when no matchers are set", function()
-		Given("a map")
+		Given "a map"
 		local test_table = {
 			test_1 = 1,
 			test_2 = "test",
@@ -18,13 +17,13 @@ describe("provider.entries(table, key_matcher, value_matcher)", function()
 			test_4 = function()end,
 		}
 
-		When("iterating through it without matchers set")
+		When "iterating through it without matchers set"
 		local test_copy = {}
 		for key, var in  provider.entries(test_table) do
 			test_copy[key] = var
 		end
 
-		Then("return all the entries")
+		Then "return all the entries"
 		assert.are.same(test_table, test_copy)
 	end)
 	it("can select entries based on matching", function()
@@ -37,17 +36,16 @@ describe("provider.entries(table, key_matcher, value_matcher)", function()
 			test_5 = "test2"
 		}
 
-		When("iterating through it with a string value matcher set")
+		When "iterating through it with a string value matcher set"
 		local test_copy = {}
 		for key, var in  provider.entries(test_table, nil, cubictest.match.is_string()) do
 			test_copy[key] = var
 		end
 
-		Then("return only the matched entries")
+		Then "return only the matched entries"
 		assert.are.same({ test_2 = "test", test_5 = "test2"}, test_copy)
 	end)
 end)
-]]--
 
 function provider.entries(table, key_matcher, value_matcher)
 	local nested_next, nested_table, nested_index = pairs(table)
