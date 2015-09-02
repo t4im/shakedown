@@ -9,7 +9,6 @@
 -- * per game minetest.conf (key needs to be prefixed with "cubictest_")
 -- * cubictest.conf in your worldpath
 --
-
 local config = {
 	settings = Settings(core.get_worldpath() .. DIR_DELIM .. "cubictest.conf"):to_table(),
 	register_defaults = function(self, defaults)
@@ -23,7 +22,11 @@ local config = {
 	get = function(self, key)
 		return core.setting_get("cubictest_" .. key) or self.settings[key]
 	end,
+	is = function(self, key)
+		return core.setting_getbool("cubictest_" .. key) or self.settings[key]
+	end,
 }
+
 cubictest.config = setmetatable(config, {
 	__index = function(table, key)
 		return table:get(key)
