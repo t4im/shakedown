@@ -1,10 +1,6 @@
 local modpath = core.get_modpath(core.get_current_modname())
 cubictest = {
 	modpath = modpath,
-	notify = function(level, msg)
-		core.log(level, msg)
-		core.chat_send_all(level .. ": " .. msg)
-	end,
 }
 
 -- load constants and configuration

@@ -2,23 +2,14 @@ local string, table, core, cubictest = string, table, core, cubictest
 local reporter = {
 	print_out = function(level, msg)
 		if not msg then return end
-		if level then
-			core.log(level, msg)
-			core.chat_send_all(level .. ": " .. msg)
-		else
-			core.log("action", msg)
-			core.chat_send_all(msg)
-		end
+		core.log(level or "action", msg)
+		core.chat_send_all(msg)
 	end,
 }
 cubictest.reporter = reporter
 
 reporter.flush = function(level)
 	reporter.print_out(level, reporter.formatter:flush())
-end
-
-reporter.print = function(text, ...)
-	reporter.formatter:print(text, ...)
 end
 
 local formatter = {
