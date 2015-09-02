@@ -1,0 +1,6 @@
+[submodule "say"]
+	path = cubictest/lib/say
+	url = https://github.com/Olivine-Labs/say.git
+[submodule "luassert"]
+	path = cubictest/lib/luassert
+	url = https://github.com/Olivine-Labs/luassert.git
