@@ -28,7 +28,7 @@ mocks.ObjectRef = {
 	--* `get_hp()`: returns number of hitpoints (2 * number of hearts)
 	get_hp = getter("hp", cubictest.constants.PLAYER_MAX_HP),
 	--* `set_hp(hp)`: set number of hitpoints (2 * number of hearts)
-	get_hp = setter("hp"),
+	set_hp = setter("hp"),
 
 	--* `get_inventory()`: returns an `InvRef`
 	get_inventory = getter("inventory"),
