@@ -2,19 +2,38 @@
 
 > shake·down /ˈʃeɪkdaʊn/ (noun): a period of testing undergone before being declared operational.
 
-<dl>
-	<dt><a href="./cubictest/">cubictest</a></dt>
-	<dd>The behavior driven testing framework for minetest.</dd>
-
-	<dt><a href="./testingground/">testingground</a></dt>
-	<dd>A testing oriented singlenode mapgen.</dd>
-
-	<dt><a href="./sd/">sd</a></dt>
-	<dd>Shakedown — tools and utilities around developing, testing and debugging mods and minetest games.</dd>
-
-	<dt><a href="./smoketest/">smoketest</a></dt>
-	<dd>Preliminary tests, that detects simple early failures.</dd>
-</dl>
+#### [cubictest](./cubictest/)
+###### The behavior driven testing framework for minetest
+![](./cubictest/cubictest_logo.png)
+```lua
+describe("my mod's functionality", function()
+	it("can calculate 1*1", function()
+		Given "two numbers"
+		local number, factor = 1, 1
+		When "multiplying"
+		local result = number * factor
+		Then "calculate the right answer"
+		assert.is.equal(1, result)
+	end)
+end)
+```
+#### [smoketest](./smoketest/)
+###### Preliminary tests, that detects simple early failures.
+```yaml
+Node: default:chest_locked
+ - it can be placed against an unknown node and will be removed from the ItemStack
+ - it can be punched
+ - it handles a null player passed to its can_dig(pos, [player])
+!! but fails with:
+.../default/nodes.lua:1357: attempt to index local 'player' (a nil value)
+[fail (2/3)]
+```
+#### [sd (shakedown)](./sd/)
+###### Utilities for developing, (collaborative) testing and debugging.
+![](./sd/screenshot.png)
+#### [testingground](./testingground/)
+###### A testing oriented singlenode mapgen.
+![](./testingground/screenshot.png)
 
 Make sure to get the submodules too:
 ```sh
