@@ -11,33 +11,33 @@ return cubictest.formatter:new{
 	end,
 
 	["Specification Error"] = function(self, event)
-		self:write_ln("[!] fails during setup:\n%s", event.message)
+		self:write_ln("!! fails during setup:\n%s", event.message)
 	end,
 
 	["Generic Error"] = function(self, event)
-		self:write_ln("[!] but fails with:\n%s", event.message)
+		self:write_ln("!! but fails with:\n%s", event.message)
 	end,
 
 	["Step"] = function(self, event)
-		self:write_ln("  + %s %s", event.conjunction, event.description)
+		self:write_ln("    + %s %s", event.conjunction, event.description)
 	end,
 
 	["TestCase Start"] = function(self, event)
-		self:write_ln("- %s ", event.context.description)
+		self:write_ln("  - %s", event.context.description)
 	end,
 
 	["TestCase End"] = function(self, event)
 	end,
 
 	["Specification Start"] = function(self, event)
-		self:write_ln("%s", event.context.description)
+		self:write_ln("%s:", event.context.description)
 	end,
 
 	["Specification End"] = function(self, event)
 		self.cases_passed = self.cases_passed + event.passed
 		self.cases_failed = self.cases_failed + event.failed
 		local summary = string.format("%s (%d/%d)", event.failed == 0 and "ok" or "fail", event.passed, event.total)
-		self:write_ln("[%10s]", summary)
+		self:write_ln("[ %10s ]", summary)
 	end,
 
 	["Suite Start"] = function(self, event)
