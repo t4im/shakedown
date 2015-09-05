@@ -38,11 +38,22 @@ mocks.ObjectRef = {
 	get_wield_index = getter("wield_index", 1),
 	--* `get_wielded_item()`: returns an `ItemStack`
 	get_wielded_item = function(self)
-		self:get_inventory():get_stack(self:get_wield_list(), self:get_wield_index())
+		local inventory = self:get_inventory()
+		if not inventory then
+			-- cheap fallback, until we have a proper inventory
+			return self.wielded_item or ItemStack()
+		end
+		return inventory:get_stack(self:get_wield_list(), self:get_wield_index())
 	end,
 	--* `set_wielded_item(item)`: replaces the wielded item, returns `true` if successful
 	set_wielded_item = function(self, item)
-		self:get_inventory():set_stack(self:get_wield_list(), self:get_wield_index(), item)
+		local inventory = self:get_inventory()
+		if not inventory then
+			-- cheap fallback, until we have a proper inventory
+			self.wielded_item = item
+			return true
+		end
+		inventory:set_stack(self:get_wield_list(), self:get_wield_index(), item)
 		return true
 	end,
 

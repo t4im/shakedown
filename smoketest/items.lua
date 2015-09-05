@@ -74,12 +74,10 @@ for name, def in pairs(core.registered_items) do
 				Given "a pointed_thing, pointing at an unknown node"
 				local pointed_thing = {under=unknown_node_pos, above=pos, type="node"}
 				And "a player wielding the item"
-				mock_player.get_wielded_item = function()
-					return ItemStack(name)
-				end
+				mock_player:set_wielded_item(ItemStack(name))
 
 				When "using against it"
-				local returned_stack = def.on_use(mock_player.get_wielded_item(), mock_player, pointed_thing)
+				local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
 
 				Then "return either an itemstack or nil"
 				-- TODO
@@ -88,12 +86,10 @@ for name, def in pairs(core.registered_items) do
 				Given "a pointed_thing, pointing at nothing"
 				local pointed_thing = { type="nothing" }
 				And "a player wielding the item"
-				mock_player.get_wielded_item = function()
-					return ItemStack(name)
-				end
+				mock_player:set_wielded_item(ItemStack(name))
 
 				When "using against it"
-				local returned_stack = def.on_use(mock_player.get_wielded_item(), mock_player, pointed_thing)
+				local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
 
 				Then "return either an itemstack or nil"
 				-- TODO
