@@ -1,6 +1,7 @@
 # Shakedown
 
-> shake·down /ˈʃeɪkdaʊn/ (noun): a period of testing undergone before being declared operational.
+> <dl><dt>shake·down /ˈʃeɪkdaʊn/ (noun):</dt>
+> <dd>a period of testing undergone before being declared operational.</dd></dl>
 
 #### [cubictest](./cubictest/)
 ###### The behavior driven testing framework for minetest
@@ -17,6 +18,7 @@ describe("my mod's functionality", function()
 	end)
 end)
 ```
+
 #### [smoketest](./smoketest/)
 ###### Preliminary tests, that detects simple early failures.
 ```yaml
@@ -28,9 +30,11 @@ Node: default:chest_locked
 .../default/nodes.lua:1357: attempt to index local 'player' (a nil value)
 [fail (2/3)]
 ```
+
 #### [sd (shakedown)](./sd/)
 ###### Utilities for developing, (collaborative) testing and debugging.
 ![](./sd/screenshot.png)
+
 #### [testingground](./testingground/)
 ###### A testing oriented singlenode mapgen.
 ![](./testingground/screenshot.png)
@@ -40,9 +44,15 @@ Make sure to get the submodules too:
 git clone --recurse-submodules https://github.com/t4im/shakedown.git
 ```
 
+And to recurse submodules when updating:
+```sh
+git pull --recurse-submodules
+```
+
 ## Related projects
-* <a href="https://github.com/t4im/profiler/">profiler</a> — Measure and analyze performance of mods.
-* <a href="https://github.com/t4im/coretest/">coretest</a> — cubictest against the minetest api/core.
+* [shakedown_game](https://github.com/t4im/shakedown_game/): The All-in-one Package
+* [profiler](https://github.com/t4im/profiler/): Measure and analyze performance of mods.
+* [coretest](https://github.com/t4im/coretest/): cubictest against the minetest api/core.
 
 ## License
 The following applies to all mods of this modpack unless different conditions are stated in their respective directories:
