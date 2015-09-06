@@ -16,7 +16,10 @@ local Testable = {
 	__tostring = function (self) return self.description end,
 	new = function(self, object)
 		object = object or {}
-		object.events = {}
+		object.children = {}
+		if self.__new then
+			self.__new(object)
+		end
 		return setmetatable(object, {
 			__index = self,
 			__tostring = self.__tostring,
@@ -26,6 +29,9 @@ local Testable = {
 		table.insert(self.events, event)
 		self.last_event = event
 		return event
+	end,
+	add = function(self, child)
+		table.insert(self.children, child)
 	end,
 	_start = function(self)
 		-- lets start positive, sadness will come on its own
@@ -95,11 +101,6 @@ cubictest.TestCase = Testable {
 
 cubictest.Specification = Testable {
 	type = "Specification",
-	new = function(self, object)
-		object = cubictest.Testable.new(self, object)
-		object.testcases = {}
-		return object
-	end,
 	_set_up = function(self)
 		if not self.is_set_up then
 			self:try(self.func)
@@ -112,7 +113,7 @@ cubictest.Specification = Testable {
 	end,
 	_run = function(self)
 		local ok, fail = 0, 0
-		for _, testcase in pairs(self.testcases) do
+		for _, testcase in pairs(self.children) do
 			testrunner.ctx_case = testcase
 			testcase:run()
 			if testcase.success then
@@ -130,11 +131,11 @@ cubictest.Specification = Testable {
 		reporter.flush(self.success and "action" or "error")
 	end,
 	register_testcase = function(self, description, func)
-		local testcase = cubictest.TestCase:new{
+		local testcase = cubictest.TestCase:new {
 			description = description,
 			func = func
 		}
-		table.insert(self.testcases, testcase)
+		self:add(testcase)
 		return testcase
 	end
 }
