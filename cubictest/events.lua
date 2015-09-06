@@ -42,7 +42,9 @@ events.Start = Event {
 	type = "Start",
 	meta = {
 		__call = function(self)
-			return self:new {}
+			return self:new {
+				time = core.get_us_time()
+			}
 		end,
 	},
 }
@@ -51,7 +53,9 @@ events.End = Event {
 	type = "End",
 	meta = {
 		__call = function(self)
-			return self:new {}
+			return self:new {
+				time = core.get_us_time()
+			}
 		end,
 	},
 }

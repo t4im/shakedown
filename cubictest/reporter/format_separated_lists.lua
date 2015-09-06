@@ -1,3 +1,4 @@
+local string, round = string, math.round
 return cubictest.formatter:new{
 	["Specification Error"] = function(self, run, event)
 		self:write_ln("[!] fails during setup:\n%s", event.message)
@@ -36,8 +37,15 @@ return cubictest.formatter:new{
 
 	["Suite End"] = function(self, run, event)
 		local cases_total = self.cases_passed + self.cases_failed
-		self:write_ln("***** Run %d tests (%d passed, %d failed) of %d specifications (%d passed, %d failed) *****",
-			cases_total, self.cases_passed, self.cases_failed,
-			run:get_total(), run.passed, run.failed)
+		self:write_ln(string.rep("*", 80))
+		self:write_ln("*** Run %d tests (%d passed, %d failed)",
+			cases_total, self.cases_passed, self.cases_failed)
+		local specs_total = run:get_total()
+		self:write_ln("*** of %d specifications (%d passed, %d failed)",
+			specs_total, run.passed, run.failed)
+		local run_time = event.time - run.events[1].time
+		self:write_ln("*** in %.2fs (avg. %.2fms/test %.2fms/spec)",
+			run_time/1000000, run_time/cases_total/1000, run_time/specs_total/1000)
+		self:write_ln(string.rep("*", 80))
 	end,
 }
