@@ -48,7 +48,7 @@ local Testable = {
 	try = function(self, func, ...)
 		local result, err = pcall(func, ...)
 		if err then
-			self.run_state:add(Error(self, err))
+			self.run_state:add(Error(err))
 		end
 		return result
 	end
