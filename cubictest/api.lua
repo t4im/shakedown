@@ -25,23 +25,27 @@ local abstract_test_env = {
 }
 cubictest.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
+function string:multi_line_clean()
+	return self:gsub("%s+", " "):trim()
+end
+
 local testcase_env = {
-	Given = function(description) return testrunner.ctx_case:step("Given", description) end,
-	When = function(description) return testrunner.ctx_case:step("When", description) end,
-	Then = function(description) return testrunner.ctx_case:step("Then", description) end,
-	And = function(description) return testrunner.ctx_case:step("And", description) end,
-	But = function(description) return testrunner.ctx_case:step("But", description) end,
+	Given = function(description) return testrunner.ctx_case:step("Given", description:multi_line_clean()) end,
+	When = function(description) return testrunner.ctx_case:step("When", description:multi_line_clean()) end,
+	Then = function(description) return testrunner.ctx_case:step("Then", description:multi_line_clean()) end,
+	And = function(description) return testrunner.ctx_case:step("And", description:multi_line_clean()) end,
+	But = function(description) return testrunner.ctx_case:step("But", description:multi_line_clean()) end,
 }
 cubictest.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
 
 local spec_env = {
 	it = function(description, func)
 		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("it " .. description, func)
+		return testrunner.ctx_spec:register_testcase("it " .. description:multi_line_clean(), func)
 	end,
 	its = function(description, func)
 		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("its " .. description, func)
+		return testrunner.ctx_spec:register_testcase("its " .. description:multi_line_clean(), func)
 	end,
 	set_up = function(func)
 		setfenv(func, testcase_env)

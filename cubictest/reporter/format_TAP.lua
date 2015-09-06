@@ -7,11 +7,13 @@ return cubictest.formatter:new{
 	end,
 
 	["Specification Error"] = function(self, run, event)
-		self:write_ln("# ! it fails during setup with:\n# ! %s", event.message:gsub("\n", "\n# !"))
+		self:write_ln("# ! it fails during setup with:")
+		self:write_ln(event.message:prefix_lines("# !"))
 	end,
 
 	["Generic Error"] = function(self, run, event)
-		self:write_ln("# ! it fails with:\n# ! %s", event.message:gsub("\n", "\n# !"))
+		self:write_ln("# ! it fails with:")
+		self:write_ln(event.message:prefix_lines("# !"))
 	end,
 
 	["Specification Start"] = function(self, run, event)

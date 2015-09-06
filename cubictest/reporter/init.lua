@@ -14,6 +14,10 @@ local reporter = {
 }
 cubictest.reporter = reporter
 
+string.prefix_lines = function(self, prefix)
+	return prefix .. string:gsub("\n", "\n" .. prefix)
+end
+
 local formatter = {
 	new = function(self, object)
 		object = object or {}
