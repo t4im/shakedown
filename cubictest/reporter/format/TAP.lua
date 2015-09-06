@@ -1,8 +1,6 @@
 local string = string
 return cubictest.formatter:new{
 	["Suite Start"] = function(self, run, event)
-		self.cases_passed = 0
-		self.cases_failed = 0
 		self.index = 0
 	end,
 
@@ -17,8 +15,6 @@ return cubictest.formatter:new{
 	end,
 
 	["Specification Start"] = function(self, run, event)
-		self.cases_passed = self.cases_passed + run.passed
-		self.cases_failed = self.cases_failed + run.failed
 		self:write_ln("# describe %s (%d/%d):", run.target.description, run.passed, run:get_total())
 	end,
 
@@ -43,9 +39,9 @@ return cubictest.formatter:new{
 		local specs_total = run:get_total()
 		self:write_ln("# %d specifications (%d passed, %d failed) in %.2fms/spec",
 			specs_total, run.passed, run.failed, run_time/specs_total/1000)
-		local cases_total = self.cases_passed + self.cases_failed
-		self:write_ln("# of %d tests (%d passed, %d failed) in %.2fms/test",
-			cases_total, self.cases_passed, self.cases_failed, run_time/cases_total/1000)
+		local cases_total = run.children_passed + run.children_failed
+		self:write_ln("# %d tests (%d passed, %d failed) in %.2fms/test",
+			cases_total, run.children_passed, run.children_failed, run_time/cases_total/1000)
 
 		self:write_ln("0..%d", cases_total)
 	end,

@@ -68,7 +68,9 @@ events.Run = Event {
 				target = target,
 				events = {},
 				passed = 0,
+				children_passed = 0,
 				failed = 0,
+				children_failed = 0,
 				-- lets start positive, sadness will come on its own
 				success = true,
 			}
@@ -85,6 +87,8 @@ events.Run = Event {
 				self.failed = self.failed + 1
 				self.success = false
 			end
+			self.children_passed = self.children_passed + event.passed
+			self.children_failed = self.children_failed + event.failed
 		elseif event.type == "Error" then
 			-- :'-(
 			self.success = false
