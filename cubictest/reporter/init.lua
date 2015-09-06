@@ -25,15 +25,22 @@ dofile(format_path .. "/init.lua")
 
 cubictest.config:register_defaults({
 	report_chat = "simple",
+	report_chat_verbosity = "warnings",
 	report_log = "simple",
+	report_log_verbosity = "warnings",
 })
+
 
 local report_chat = cubictest.config:get("report_chat"):match("([0-9a-zA-Z_]+)")
 if report_chat and report_chat ~= "false" then
-	reporter.chat_formatter = dofile(string.format("%s/%s.lua", format_path, report_chat or "simple")):new()
+	reporter.chat_formatter = dofile(string.format("%s/%s.lua", format_path, report_chat or "simple")):new {
+		verbosity = cubictest.config:get("report_chat_verbosity"),
+	}
 end
 
 local report_log = cubictest.config:get("report_log"):match("([0-9a-zA-Z_]+)")
 if report_log and report_log ~= "false" then
-	reporter.log_formatter = dofile(string.format("%s/%s.lua", format_path, report_log or "simple")):new()
+	reporter.log_formatter = dofile(string.format("%s/%s.lua", format_path, report_log or "simple")):new {
+		verbosity = cubictest.config:get("report_log_verbosity"),
+	}
 end

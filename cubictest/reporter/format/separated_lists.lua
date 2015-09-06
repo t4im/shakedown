@@ -1,26 +1,23 @@
 local string, round = string, math.round
-return cubictest.formatter:new{
-	["Specification Error"] = function(self, run, event)
-		self:write_ln("[!] fails during setup:\n%s", event.message)
+return cubictest.formatter:new {
+	["Suite Start"] = function(self, run, event)
+		self.cases_passed = 0
+		self.cases_failed = 0
 	end,
 
-	["Generic Error"] = function(self, run, event)
-		self:write_ln("[!] but fails with:\n%s", event.message)
-	end,
-
-	["Step"] = function(self, run, event)
-		self:write_ln("  + %s %s", event.conjunction, event.description)
+	["Specification Start"] = function(self, run, event)
+		self:write_ln("\n%s", run.target.description)
 	end,
 
 	["TestCase Start"] = function(self, run, event)
 		self:write_ln("- %s ", run.target.description)
 	end,
 
-	["TestCase End"] = function(self, run, event)
+	["Step"] = function(self, run, event)
+		self:write_ln("  + %s %s", event.conjunction, event.description)
 	end,
 
-	["Specification Start"] = function(self, run, event)
-		self:write_ln("\n%s", run.target.description)
+	["TestCase End"] = function(self, run, event)
 	end,
 
 	["Specification End"] = function(self, run, event)
@@ -30,9 +27,8 @@ return cubictest.formatter:new{
 		self:write_ln("=========================================================[ %16s ]===", summary)
 	end,
 
-	["Suite Start"] = function(self, run, event)
-		self.cases_passed = 0
-		self.cases_failed = 0
+	["Specification Error"] = function(self, run, event)
+		self:write_ln("[!] fails during setup:\n%s", event.message)
 	end,
 
 	["Suite End"] = function(self, run, event)
@@ -47,5 +43,9 @@ return cubictest.formatter:new{
 		self:write_ln("*** in %.2fs (avg. %.2fms/test %.2fms/spec)",
 			run_time/1000000, run_time/cases_total/1000, run_time/specs_total/1000)
 		self:write_ln(string.rep("*", 80))
+	end,
+
+	["Generic Error"] = function(self, run, event)
+		self:write_ln("[!] but fails with:\n%s", event.message)
 	end,
 }

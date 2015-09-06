@@ -41,8 +41,13 @@ local formatter = {
 	["Generic Error"] = function(self, event) self:write_ln(event.message) end,
 
 	["Run"] = function(self, parent_run, run)
+		local verbosity =self.verbosity
 		for index, subevent in ipairs(run.events) do
-			if not run.success or subevent.type ~= "Step" then
+			local type = subevent.type
+			if not run.success
+				or (type == "Step" and verbosity == "steps")
+				or (type ~= "Step" and verbosity == "info")
+			then
 				self:event(run, subevent)
 			end
 		end
