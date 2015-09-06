@@ -5,12 +5,14 @@ local reporter = {
 		core.log(level or "action", msg)
 		core.chat_send_all(msg)
 	end,
+	event = function(self, event)
+		self.formatter:event(nil, event)
+	end,
+	flush = function(self, level)
+		self.print_out(level, self.formatter:flush())
+	end
 }
 cubictest.reporter = reporter
-
-reporter.flush = function(level)
-	reporter.print_out(level, reporter.formatter:flush())
-end
 
 local formatter = {
 	new = function(self, object)
@@ -50,23 +52,29 @@ local formatter = {
 	["Unknown Event"] = function(self, event) error("unknown event fired: " .. dump(event)) end,
 	["Generic Error"] = function(self, event) self:write_ln(event.message) end,
 
-	event = function(self, event, ...)
-		self[event.type](self, event, ...)
+	["Run"] = function(self, parent_run, run)
+		for index, subevent in ipairs(run.events) do
+			if not run.success or subevent.type ~= "Step" then
+				self:event(run, subevent)
+			end
+		end
+	end,
+
+	event = function(self, run, event)
+		self[event.type](self, run, event)
 	end,
 }
 cubictest.formatter = formatter
 
 local function add_ctx_switch(name)
 	local generic_key = "Generic " .. name
-	formatter[name] = function(self, event)
-		local ctx = event.context
-		if ctx and ctx.type then
-			local subformatter = self[string.format("%s %s", ctx.type, name)]
-			if subformatter then
-				return subformatter(self, event)
-			end
+	formatter[name] = function(self, run, event)
+		local type = run and run.target.type or "Root"
+		local subformatter = self[string.format("%s %s", type, name)]
+		if subformatter then
+			return subformatter(self, run, event)
 		end
-		self[generic_key](self, event)
+		self[generic_key](self, run, event)
 	end
 
 	if not formatter[generic_key] then

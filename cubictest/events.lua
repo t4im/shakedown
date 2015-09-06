@@ -12,7 +12,7 @@ local Event = {
 		object.meta = nil
 		return setmetatable(object, meta)
 	end,
-	report = function(self) reporter.formatter:event(self) end,
+	report = function(self) reporter.formatter:event(self.parent or self, self) end,
 }
 events.Event = setmetatable(Event, {
 	__tostring = function(self) string.format("%s Event: %s", self.type, self.description or dump(self)) end,
@@ -32,8 +32,8 @@ events.Step = Event {
 events.Error = Event {
 	type = "Error",
 	meta = {
-		__call = function(self, context, err)
-			return self:new { context=context, message=tostring(err), }
+		__call = function(self, err)
+			return self:new { message=tostring(err), }
 		end,
 	},
 }
@@ -41,8 +41,8 @@ events.Error = Event {
 events.Start = Event {
 	type = "Start",
 	meta = {
-		__call = function(self, context)
-			return self:new { context=context, }
+		__call = function(self)
+			return self:new {}
 		end,
 	},
 }
@@ -50,15 +50,8 @@ events.Start = Event {
 events.End = Event {
 	type = "End",
 	meta = {
-		__call = function(self, context, report)
-			local passed, failed = report.passed or 0, report.failed or 0
-			return self:new {
-				context=context,
-				passed = passed,
-				failed = failed,
-				total = report.total or (passed + failed),
-				verdict = report.verdict or (context.success and "OK" or "FAILED")
-			}
+		__call = function(self)
+			return self:new {}
 		end,
 	},
 }
@@ -67,7 +60,38 @@ events.Run = Event {
 	type = "Run",
 	meta = {
 		__call = function(self, target)
-			return self:new { target = target, }
+			return self:new {
+				target = target,
+				events = {},
+				passed = 0,
+				failed = 0,
+				-- lets start positive, sadness will come on its own
+				success = true,
+			}
 		end,
 	},
+	add = function(self, event)
+		if event.type == "Step" then
+			-- every step we make, until we throw an error
+			self.passed = self.passed + 1
+		elseif event.type == "Run" then
+			if event.success then
+				self.passed = self.passed + 1
+			else
+				self.failed = self.failed + 1
+				self.success = false
+			end
+		elseif event.type == "Error" then
+			-- :'-(
+			self.success = false
+		end
+		event.parent = self
+		table.insert(self.events, event)
+	end,
+	get_verdict = function(self)
+		return self.success and "OK" or "FAILED"
+	end,
+	get_total = function(self)
+		return self.failed + self.passed
+	end,
 }
