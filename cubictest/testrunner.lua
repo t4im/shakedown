@@ -116,7 +116,7 @@ function cubictest.testrunner:runAll(filter)
 	self.ctx_spec = nil
 	run_state:add(End())
 	reporter:event(run_state)
-	reporter:flush()
+	reporter:print()
 end
 
 local usage = "<filter> | all"
