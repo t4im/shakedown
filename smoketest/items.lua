@@ -66,6 +66,11 @@ for name, def in pairs(core.registered_items) do
 				And "return the leftover itemstack"
 				assert.is_truthy(left_over_stack)
 				-- TODO better
+
+				-- cleanup the spill
+				for _, object in ipairs(core.get_objects_inside_radius(pos, 1) or {}) do
+					object:remove()
+				end
 			end)
 		end
 
