@@ -1,5 +1,5 @@
 string.prefix_lines = function(self, prefix)
-	return prefix .. string:gsub("\n", "\n" .. prefix)
+	return prefix .. self:gsub("\n", "\n" .. prefix)
 end
 
 local formatter = {
