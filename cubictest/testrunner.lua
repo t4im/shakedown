@@ -34,11 +34,13 @@ local Testable = {
 		local run_state = Run(self)
 		self.run_state = run_state
 
-		-- run its lifecycle
+		-- run its test phases
 		run_state:add(Start())
-		self:_set_up()
+		if self._set_up then self:_set_up() end
+		if self.fixture_setup then self.fixture_setup() end
 		self:_run(run_state)
-		self:_tear_down()
+		if self.fixture_teardown then self.fixture_teardown() end
+		if self._tear_down then self:_tear_down() end
 		run_state:add(End())
 
 		return run_state
@@ -64,10 +66,6 @@ cubictest.TestCase = Testable {
 		self.ctx_step = step
 		return step
 	end,
-	_set_up = function(self)
-	end,
-	_tear_down = function(self)
-	end,
 	_run = function(self, run_state)
 		if not run_state.success then return end
 		return self:try(self.func)
@@ -81,7 +79,6 @@ cubictest.Specification = Testable {
 			self:try(self.func)
 			self.is_set_up = true
 		end
-		if self.fixture_setup then self.fixture_setup() end
 	end,
 	_run = function(self, run_state)
 		for _, testcase in pairs(self.children) do
@@ -90,9 +87,6 @@ cubictest.Specification = Testable {
 			run_state:add(result_state)
 		end
 		testrunner.ctx_case = nil
-	end,
-	_tear_down = function(self)
-		if self.fixture_teardown then self.fixture_teardown() end
 	end,
 	register_testcase = function(self, description, func)
 		local testcase = cubictest.TestCase:new {
