@@ -13,4 +13,5 @@ function cubictest:register_matcher(name, func)
 end
 
 dofile(path .. "/tables.lua")
+dofile(path .. "/classes.lua")
 dofile(path .. "/item_groups.lua")

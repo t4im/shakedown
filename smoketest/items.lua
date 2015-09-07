@@ -1,4 +1,5 @@
-local core, cubictest = core, cubictest
+local core, cubictest, ItemStack = core, cubictest, ItemStack
+local ipairs, pairs = ipairs, pairs
 local pos = { x=0, y=10, z=0 }
 local unknown_node_pos = { x=0, y=9, z=0 }
 local mock_player = cubictest.mocks.Player:new()
@@ -55,8 +56,7 @@ for name, def in pairs(core.registered_items) do
 					-- assert.is_not_equal("air", core.get_node(pos).name)
 
 					And "return the leftover itemstack"
-					assert.is_truthy(left_over_stack)
-					-- TODO better
+					assert.is_itemstack(left_over_stack)
 
 					And "reduce the itemstack count"
 					assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
@@ -72,8 +72,7 @@ for name, def in pairs(core.registered_items) do
 					local left_over_stack = def.on_place(stack, mock_player, pointed_thing)
 
 					Then "return the leftover itemstack"
-					assert.is_truthy(left_over_stack)
-					-- TODO better
+					assert.is_itemstack(left_over_stack)
 				end)
 			end
 		end
@@ -84,8 +83,7 @@ for name, def in pairs(core.registered_items) do
 				local left_over_stack = def.on_drop(ItemStack(name), mock_player, pos)
 				Then "drop the item"
 				And "return the leftover itemstack"
-				assert.is_truthy(left_over_stack)
-				-- TODO better
+				assert.is_itemstack(left_over_stack)
 
 				-- cleanup the spill
 				for _, object in ipairs(core.get_objects_inside_radius(pos, 1) or {}) do
@@ -106,8 +104,10 @@ for name, def in pairs(core.registered_items) do
 					When "using against it"
 					local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
 
-					Then "return either an itemstack or nil"
-					-- TODO
+					Then "return an itemstack or nil"
+					if returned_stack ~= nil then
+						assert.is_itemstack(returned_stack)
+					end
 				end)
 			end
 		end
@@ -119,7 +119,9 @@ for name, def in pairs(core.registered_items) do
 				When "being called instead of wearing out the tool"
 				local returned_stack = def.after_use(stack, mock_player, core.get_node(pos), { wear = 1})
 				Then "return an itemstack or nil"
-				-- TODO
+				if returned_stack ~= nil then
+					assert.is_itemstack(returned_stack)
+				end
 			end)
 		end
 
@@ -154,11 +156,10 @@ for name, def in pairs(core.registered_items) do
 					local stack = ItemStack("default:stone 1")
 
 					When "right clicked"
-					def.on_right_click(pos, core.get_node(pos), mock_player, stack, nil)
+					local left_over_stack = def.on_right_click(pos, core.get_node(pos), mock_player, stack, nil)
 
 					Then "return the leftover itemstack"
-					assert.is_truthy(stack)
-					-- TODO better
+					assert.is_itemstack(left_over_stack)
 
 				end)
 				it("can be rightclicked by an empty handed player", function()
@@ -168,11 +169,10 @@ for name, def in pairs(core.registered_items) do
 					local stack = ItemStack()
 
 					When "right clicked"
-					def.on_right_click(pos, core.get_node(pos), mock_player, stack, pointed_thing)
+					local left_over_stack = def.on_right_click(pos, core.get_node(pos), mock_player, stack, pointed_thing)
 
 					Then "return the leftover itemstack"
-					assert.is_truthy(stack)
-					-- TODO better
+					assert.is_itemstack(left_over_stack)
 				end)
 				it("can be rightclicked by an undefined itemstack", function()
 					Given "a pointed_thing"
@@ -182,11 +182,10 @@ for name, def in pairs(core.registered_items) do
 					local stack = nil
 
 					When "right clicked"
-					def.on_right_click(pos, core.get_node(pos), mock_player, stack, pointed_thing)
+					local left_over_stack = def.on_right_click(pos, core.get_node(pos), mock_player, stack, pointed_thing)
 
 					Then "return the leftover itemstack"
-					assert.is_truthy(stack)
-					-- TODO better
+					assert.is_itemstack(left_over_stack)
 				end)
 			end
 
