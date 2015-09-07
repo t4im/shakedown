@@ -1,22 +1,4 @@
-local cubictest, luassert = cubictest, cubictest.luassert
-cubictest.match = cubictest.luassert_match
-
-luassert:register("matcher", "in_creative_inventory", function(state, arguments, level)
-	return function(item)
-		if type(item) == "string" then
-			item = core.registered_items[item]
-		end
-		return not(
-			-- list of reasons, why it wouldn't be
-			not item
-			or not item.description
-			or item.description == ""
-			or item.groups.not_in_creative_inventory and item.groups.not_in_creative_inventory ~= 0
-			)
-	end
-end)
-
---
+local cubictest = cubictest
 
 describe("matcher.is_value_of(table, key)(value)", function()
 	it("matches values that are set to the specified key of a table", function()
@@ -48,7 +30,7 @@ describe("matcher.is_value_of(table, key)(value)", function()
 	end)
 end)
 
-luassert:register("matcher", "is_value_of", function(state, arguments, level)
+cubictest:register_matcher("is_value_of", function(state, arguments, level)
 	local arg_table = arguments[1]
 	assert(type(arg_table) == "table")
 	local arg_key = arguments[2]
@@ -93,7 +75,7 @@ describe("matcher.is_subset_of(table)(table)", function()
 	end)
 end)
 
-luassert:register("matcher", "is_subset_of", function(state, arguments, level)
+cubictest:register_matcher("is_subset_of", function(state, arguments, level)
 	local arg_table = arguments[1]
 	assert(type(arg_table) == "table")
 

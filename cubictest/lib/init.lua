@@ -6,5 +6,9 @@ package.path =
 	modpath .. "/?.lua;" ..
 	package.path
 
-cubictest.luassert = require("luassert")
-cubictest.luassert_match = require("luassert.match")
+cubictest.say = require("say")
+cubictest.assert = require("luassert")
+cubictest.match = require("luassert.match")
+
+---- use the extended luassert implementation as an drop-in replacement for all asserts
+assert = cubictest.assert

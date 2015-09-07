@@ -1,22 +1,5 @@
 local cubictest, testrunner = cubictest, cubictest.testrunner
 --
--- assertions
---
-cubictest.assert = {
-	-- for custom asserts, that aren't available in luassert
-	}
-
-local original_assert = assert
-setmetatable(cubictest.assert, {
-	-- make all luassert assertions available
-	__index = cubictest.luassert,
-	-- behave like the default assert if called as such
-	__call = function(table, ...) return original_assert(...) end
-})
--- use our assert implementation as an drop-in replacement for all asserts
-assert = cubictest.assert
-
---
 -- test definition language
 --
 local abstract_test_env = {
