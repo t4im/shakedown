@@ -80,3 +80,32 @@ core.register_chatcommand(core.get_current_modname() .. ":export", {
 		return false, "Usage: " .. usage
 	end,
 })
+
+function reporter.save(name)
+	local path = string.format("%s/teststate-%s-%s.%s",
+		world_path, name, os.date("%Y%m%dT%H%M%S"), "lua"
+	)
+
+	local output, err = io.open(path, "w")
+	if not output then
+		return false, "Writing to file failed with: " .. err
+	end
+	output:write(core.serialize(reporter.event))
+	io.close(output)
+
+	return true, "Teststate saved to " .. path
+end
+
+local usage = "<name>"
+core.register_chatcommand(core.get_current_modname() .. ":save", {
+	description = "save teststates.",
+	params = usage,
+	privs = { server = true },
+	func = function(name,  param)
+		local savename = string.match(param, "([^ ]+)")
+		if savename then
+			return reporter.save(savename)
+		end
+		return false, "Usage: " .. usage
+	end,
+})
