@@ -46,11 +46,11 @@ local Testable = {
 		return run_state
 	end,
 	try = function(self, func, ...)
-		local result, err = pcall(func, ...)
-		if err then
-			self.run_state:add(Error(err))
+		local succeed, err_or_result = pcall(func, ...)
+		if not succeed then
+			self.run_state:add(Error(err_or_result))
 		end
-		return result
+		return err_or_result
 	end
 }
 cubictest.Testable = setmetatable(Testable, {
