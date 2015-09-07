@@ -36,6 +36,7 @@ local formatter = {
 		if text:trim() == "" then return nil end
 		return text
 	end,
+	extension = "txt",
 
 	["Unknown Event"] = function(self, event) error("unknown event fired: " .. dump(event)) end,
 	["Generic Error"] = function(self, event) self:write_ln(event.message) end,

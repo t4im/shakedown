@@ -1,4 +1,5 @@
 local string, table, core, cubictest = string, table, core, cubictest
+local world_path = core.get_worldpath()
 local reporter = {
 	report_event = function(self, event)
 		self.event = event
@@ -44,3 +45,38 @@ if report_log and report_log ~= "false" then
 		verbosity = cubictest.config:get("report_log_verbosity"),
 	}
 end
+
+function reporter.save(reportname, format, verbosity)
+	local loaded, result = pcall(dofile, string.format("%s/%s.lua", format_path, format or "simple"))
+	if not loaded then return false, result end
+	local file_formatter = result:new {
+		verbosity = verbosity or cubictest.config:get("report_file_verbosity"),
+	}
+	file_formatter:event(nil, reporter.event)
+	local path = string.format("%s/testreport-%s-%s.%s",
+		world_path, reportname, os.date("%Y%m%dT%H%M%S"), file_formatter.extension
+	)
+
+	local output, err = io.open(path, "w")
+	if not output then
+		return false, "Writing to file failed with: " .. err
+	end
+	output:write(file_formatter:flush())
+	io.close(output)
+
+	return true, "Report saved to " .. path
+end
+
+local usage = "<name> [format]"
+core.register_chatcommand(core.get_current_modname() .. ":save", {
+	description = "Run tests.",
+	params = usage,
+	privs = { server = true },
+	func = function(name,  param)
+		local reportname, format = string.match(param, "([^ ]+) ?([0-9a-zA-Z_]*)")
+		if reportname then
+			return reporter.save(reportname, format)
+		end
+		return false, "Usage: " .. usage
+	end,
+})
