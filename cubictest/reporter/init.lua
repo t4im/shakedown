@@ -1,6 +1,6 @@
 local string, table, core, cubictest = string, table, core, cubictest
 local reporter = {
-	event = function(self, event)
+	report_event = function(self, event)
 		self.event = event
 	end,
 	print = function(self)

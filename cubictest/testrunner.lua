@@ -115,7 +115,7 @@ function cubictest.testrunner:runAll(filter)
 	end
 	self.ctx_spec = nil
 	run_state:add(End())
-	reporter:event(run_state)
+	reporter:report_event(run_state)
 	reporter:print()
 end
 
@@ -133,6 +133,7 @@ core.register_chatcommand(core.get_current_modname() .. ":run", {
 		local filter = string.match(param, "([^ ]+)")
 		if filter then
 			cubictest.testrunner:runAll(filter)
+			return true
 		end
 
 		return false, "Usage: " .. usage
