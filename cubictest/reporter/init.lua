@@ -46,7 +46,7 @@ if report_log and report_log ~= "false" then
 	}
 end
 
-function reporter.save(reportname, format, verbosity)
+function reporter.export(reportname, format, verbosity)
 	local loaded, result = pcall(dofile, string.format("%s/%s.lua", format_path, format or "simple"))
 	if not loaded then return false, result end
 	local file_formatter = result:new {
@@ -68,14 +68,14 @@ function reporter.save(reportname, format, verbosity)
 end
 
 local usage = "<name> [format]"
-core.register_chatcommand(core.get_current_modname() .. ":save", {
-	description = "Run tests.",
+core.register_chatcommand(core.get_current_modname() .. ":export", {
+	description = "export tests to different formats.",
 	params = usage,
 	privs = { server = true },
 	func = function(name,  param)
 		local reportname, format = string.match(param, "([^ ]+) ?([0-9a-zA-Z_]*)")
 		if reportname then
-			return reporter.save(reportname, format)
+			return reporter.export(reportname, format)
 		end
 		return false, "Usage: " .. usage
 	end,
