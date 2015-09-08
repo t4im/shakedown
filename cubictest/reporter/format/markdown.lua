@@ -28,6 +28,7 @@ return cubictest.formatter:new {
 	end,
 
 	["TestCase End"] = function(self, run, event)
+		self:write_ln()
 	end,
 
 	["Specification End"] = function(self, run, event)
