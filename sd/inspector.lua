@@ -30,7 +30,7 @@ insert(tabs, {
 		local node = core.get_node(pos)
 		local meta = core.get_meta(pos)
 		local inv = meta:get_inventory()
-		local inventory_lists = inv:get_lists()
+		local inventory_lists = inv:get_lists() or {}
 		local cells = ""
 		for name, list in pairs(inventory_lists) do
 			cells = format("%s,0,%s,(Size %d),,", cells, core.formspec_escape(name), #list)
