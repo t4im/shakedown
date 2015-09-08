@@ -7,7 +7,11 @@ local initial_stack_size = 5
 
 local pos_itself = positions.preset
 local pointed_at = {
+	-- we test known nodes extra, because all other cases might be handled correctly and hide an error in the "common case"
+	a_known_node = {under=positions.known_node, above=positions.known_node_top, type="node"},
 	an_unknown_node = {under=positions.unknown_node, above=positions.unknown_node_top, type="node"},
+	an_unknown_box_center = {under=positions.unknown_box_center, above=positions.unknown_box_center, type="node"},
+	a_replaceable_node = {under=positions.buildable_to_box, above=positions.buildable_to_box_top, type="node"},
 	nothing = { type="nothing" },
 	itself = {under=pos_itself, above=positions.preset_top, type="node"}
 }
@@ -40,75 +44,68 @@ for name, def in pairs(core.registered_items) do
 		end)
 
 		if has_custom(def, "on_place") then
-			if is_node then
-				it("can be placed against an unknown node and will be removed from the ItemStack", function()
+			for key, var in pairs({
+				["on top of a known node"] = pointed_at.a_known_node,
+				["on top of an unknown node"] = pointed_at.an_unknown_node,
+				["into a replaceable node"] = pointed_at.a_replaceable_node,
+				["into an unknown node"] = pointed_at.an_unknown_box_center,
+			}) do
+				it("can be placed " .. key, function()
 					Given "an ItemStack()"
 					local stack = ItemStack { name = name, count = initial_stack_size }
-					And "a pointed_thing, pointing at an unknown node"
-					local pointed_thing = pointed_at.an_unknown_node
-
-					When "calling its on_place"
-					local left_over_stack = def.on_place(stack, mock_player, pointed_thing)
-
-					Then "place something"
-					-- This doesn't work well with e.g. expandable multinode objects.
-					-- Or anything else, that might abort the placement.
-					-- assert.is_not_equal("air", core.get_node(pos).name)
-
-					And "return the leftover itemstack"
-					assert.is_itemstack(left_over_stack)
-
-					And "reduce the itemstack count"
-					assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
-				end)
-			else
-				it("can be placed against an unknown node", function()
-					Given "an ItemStack()"
-					local stack = ItemStack { name = name, count = initial_stack_size }
-					And "a pointed_thing, pointing at an unknown node"
-					local pointed_thing = pointed_at.an_unknown_node
+					And ("a pointed_thing, pointing " .. key)
+					local pointed_thing = var
 
 					When "calling its on_place"
 					local left_over_stack = def.on_place(stack, mock_player, pointed_thing)
 
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
+
+					if is_node
+						-- most expandable nodes won't like this
+						and not key =="into an unknown node"
+						-- buildable_to nodes don't seem to like being placed into other buildable_to nodes
+						and not (key == "into a replaceable node" and def.buildable_to) then
+						-- And "have something placed"
+						-- This doesn't work well with e.g. expandable multinode objects.
+						-- Or anything else, that might abort the placement.
+						-- assert.is_not_equal("air", core.get_node(pos).name)
+
+						And "reduce the itemstack count"
+						assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
+					end
 				end)
 			end
 		end
 
-		if has_custom(def, "on_drop") then
-			it("can be dropped", function()
-				When "calling on_drop"
-				local left_over_stack = def.on_drop(ItemStack(name), mock_player, positions.act_pos)
-				Then "drop the item"
-				And "return the leftover itemstack"
-				assert.is_itemstack(left_over_stack)
-
-				-- cleanup the spill
-				for _, object in ipairs(core.get_objects_inside_radius(positions.act_pos, 1) or {}) do
-					object:remove()
-				end
-			end)
-		end
-
 		if def.on_use then
-			for key, var in pairs(pointed_at) do
-				local target = key:gsub("_", " ")
-				it("can be used pointing at " .. target, function()
-					Given("a pointed_thing, pointing at " .. target)
-					local pointed_thing = var
-					And "a player wielding the item"
-					mock_player:set_wielded_item(ItemStack(name))
+			for key, var in pairs({
+				["on top of a known node"] = pointed_at.a_known_node,
+				["on top of an unknown node"] = pointed_at.an_unknown_node,
+				["into a replaceable node"] = pointed_at.a_replaceable_node,
+				["into an unknown node"] = pointed_at.an_unknown_box_center,
+				["at nothing"] = pointed_at.nothing,
+				["at itself"] = pointed_at.itself,
+			}) do
+				-- "itself" not pointing at itself, if it's not a node
+				if is_node or key ~= "itself" then
+					local target = key:gsub("_", " ")
+					it("can be used pointing " .. target, function()
+						Given("a pointed_thing, pointing " .. target)
+						local pointed_thing = var
+						And "a player wielding the item"
+						mock_player:set_wielded_item(ItemStack(name))
 
-					When "using against it"
-					local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
+						When "using against it"
+						local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
 
-					Then "return an itemstack or nil"
-					if returned_stack ~= nil then
-						assert.is_itemstack(returned_stack)
-					end
-				end)
+						Then "return an itemstack or nil"
+						if returned_stack ~= nil then
+							assert.is_itemstack(returned_stack)
+						end
+					end)
+				end
 			end
 		end
 
@@ -121,6 +118,21 @@ for name, def in pairs(core.registered_items) do
 				Then "return an itemstack or nil"
 				if returned_stack ~= nil then
 					assert.is_itemstack(returned_stack)
+				end
+			end)
+		end
+
+		if has_custom(def, "on_drop") then
+			it("can be dropped", function()
+				When "calling on_drop"
+				local left_over_stack = def.on_drop(ItemStack(name), mock_player, positions.dropspot)
+				Then "drop the item"
+				And "return the leftover itemstack"
+				assert.is_itemstack(left_over_stack)
+
+				-- cleanup the spill
+				for _, object in ipairs(core.get_objects_inside_radius(positions.dropspot, 1) or {}) do
+					object:remove()
 				end
 			end)
 		end

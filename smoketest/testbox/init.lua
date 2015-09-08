@@ -4,7 +4,10 @@ local testbox = {
 	positions = {
 		preset = {x=11, y=11, z=11},
 		preset_top = {x=11, y=12, z=11},
-		buildable_to_box_center = {x=12, y=3, z=3},
+		buildable_to_box = {x=12, y=3, z=3},
+		buildable_to_box_top = {x=12, y=4, z=3},
+		not_buildable_to_node = {x=2, y=0, z=4},
+		dropspot = {x=1, y=1, z=6},
 		known_node = {x=8, y=9, z=4},
 		known_node_top = {x=8, y=10, z=4},
 		unknown_node = {x=3, y=9, z=3},
