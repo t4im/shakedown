@@ -45,3 +45,4 @@ cubictest.dummies = dummies
 
 local path = cubictest.modpath ..  "/dummies"
 dofile(path .. "/ObjectRef.lua")
+dofile(path .. "/testnodes.lua")
