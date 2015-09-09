@@ -4,7 +4,9 @@ local cubictest, testrunner = cubictest, cubictest.testrunner
 --
 local abstract_test_env = {
 	assert = cubictest.assert, -- you shall have no other drop-in replacements beside me here
-	match = cubictest.match,
+	spy = cubictest.spy,
+	stub = cubictest.stub,
+	mock = cubictest.mock,
 }
 cubictest.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
