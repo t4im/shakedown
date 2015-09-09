@@ -10,12 +10,12 @@ local reporter = {
 		local formatter = self.log_formatter
 		if formatter then
 			formatter:event(nil, event)
-			core.log("action", formatter:flush())
+			core.log("action", formatter:flush() or "formatter did not provide any output")
 		end
 		local formatter = self.chat_formatter
 		if formatter then
 			formatter:event(nil, event)
-			core.chat_send_all(formatter:flush())
+			core.chat_send_all(formatter:flush() or "formatter did not provide any output")
 		end
 	end,
 }
