@@ -42,12 +42,13 @@ local formatter = {
 	["Generic Error"] = function(self, event) self:write_ln(event.message) end,
 
 	["Run"] = function(self, parent_run, run)
-		local verbosity =self.verbosity
+		local verbosity = self.verbosity
 		for index, subevent in ipairs(run.events) do
 			local type = subevent.type
 			if not run.success
 				or (type == "Step" and verbosity == "steps")
 				or (type ~= "Step" and verbosity == "info")
+				or run.target.type == "Suite"
 			then
 				self:event(run, subevent)
 			end
@@ -73,7 +74,7 @@ local function add_ctx_switch(name)
 	end
 
 	if not formatter[generic_key] then
-		formatter[generic_key] = function(self, event) end
+		formatter[generic_key] = function(self, run, event) end
 	end
 end
 add_ctx_switch("Error")
