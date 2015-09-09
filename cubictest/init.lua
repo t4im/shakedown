@@ -18,7 +18,7 @@ dofile(modpath .. "/testrunner.lua")
 dofile(modpath .. "/api.lua")
 
 -- supporting components
-dofile(modpath .. "/mocks/init.lua")
+dofile(modpath .. "/dummies/init.lua")
 dofile(modpath .. "/ctassert/init.lua")
 dofile(modpath .. "/provider/init.lua")
 

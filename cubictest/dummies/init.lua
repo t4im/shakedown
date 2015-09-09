@@ -1,9 +1,9 @@
-local mocks = {
+local dummies = {
 	fixed = function(x) return function() return x end end,
 	nop = function() end,
 }
 
-function mocks.setter(name, ...)
+function dummies.setter(name, ...)
 	if (...) then
 		local sub_names = { ... }
 		return function(self, value, ...)
@@ -17,11 +17,11 @@ function mocks.setter(name, ...)
 	end
 end
 
-function mocks.getter(name, default)
+function dummies.getter(name, default)
 	return function(self) return self[name] or default end
 end
 
-function mocks.multi_setter(name)
+function dummies.multi_setter(name)
 	return function(self, ...)
 		self[name] = self[name] or {}
 		for i, val in ipairs({ ... }) do
@@ -30,7 +30,7 @@ function mocks.multi_setter(name)
 	end
 end
 
-function mocks.multi_getter(name, ...)
+function dummies.multi_getter(name, ...)
 	local defaults = { ... }
 	return function(self)
 		local return_values = table.copy(self[name] or {})
@@ -41,7 +41,7 @@ function mocks.multi_getter(name, ...)
 	end
 end
 
-cubictest.mocks = mocks
+cubictest.dummies = dummies
 
-local path = cubictest.modpath ..  "/mocks"
+local path = cubictest.modpath ..  "/dummies"
 dofile(path .. "/ObjectRef.lua")

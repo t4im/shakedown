@@ -2,7 +2,7 @@ local core, cubictest, smoketest, ItemStack, table = core, cubictest, smoketest,
 local ipairs, pairs = ipairs, pairs
 local testbox, positions = smoketest.testbox, smoketest.testbox.positions
 --local pos = positions.unknown_node_top
-local mock_player = cubictest.mocks.Player:new()
+local sam = cubictest.dummies.Player:new()
 local initial_stack_size = 5
 
 local pos_itself = positions.preset
@@ -57,7 +57,7 @@ for name, def in pairs(core.registered_items) do
 					local pointed_thing = var
 
 					When "calling its on_place"
-					local left_over_stack = def.on_place(stack, mock_player, pointed_thing)
+					local left_over_stack = def.on_place(stack, sam, pointed_thing)
 
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
@@ -95,10 +95,10 @@ for name, def in pairs(core.registered_items) do
 						Given("a pointed_thing, pointing " .. target)
 						local pointed_thing = var
 						And "a player wielding the item"
-						mock_player:set_wielded_item(ItemStack(name))
+						sam:set_wielded_item(ItemStack(name))
 
 						When "using against it"
-						local returned_stack = def.on_use(mock_player:get_wielded_item(), mock_player, pointed_thing)
+						local returned_stack = def.on_use(sam:get_wielded_item(), sam, pointed_thing)
 
 						Then "return an itemstack or nil"
 						if returned_stack ~= nil then
@@ -114,7 +114,7 @@ for name, def in pairs(core.registered_items) do
 				Given "an ItemStack()"
 				local stack = ItemStack { name = name, count = initial_stack_size }
 				When "being called instead of wearing out the tool"
-				local returned_stack = def.after_use(stack, mock_player, core.get_node(positions.known_node), { wear = 1})
+				local returned_stack = def.after_use(stack, sam, core.get_node(positions.known_node), { wear = 1})
 				Then "return an itemstack or nil"
 				if returned_stack ~= nil then
 					assert.is_itemstack(returned_stack)
@@ -125,7 +125,7 @@ for name, def in pairs(core.registered_items) do
 		if has_custom(def, "on_drop") then
 			it("can be dropped", function()
 				When "calling on_drop"
-				local left_over_stack = def.on_drop(ItemStack(name), mock_player, positions.dropspot)
+				local left_over_stack = def.on_drop(ItemStack(name), sam, positions.dropspot)
 				Then "drop the item"
 				And "return the leftover itemstack"
 				assert.is_itemstack(left_over_stack)
@@ -154,7 +154,7 @@ for name, def in pairs(core.registered_items) do
 		if is_node then
 			if def.on_punch ~= core.nodedef_default.on_punch and def.on_punch then
 				it("can be punched by a player", function()
-					def.on_punch(pos_itself, core.get_node(pos_itself), mock_player, pointed_at.itself)
+					def.on_punch(pos_itself, core.get_node(pos_itself), sam, pointed_at.itself)
 				end)
 				it("can be punched by core.punch_node(pos) (nil player)", function()
 					core.punch_node(pos_itself)
@@ -168,7 +168,7 @@ for name, def in pairs(core.registered_items) do
 					local stack = ItemStack("default:stone 1")
 
 					When "right clicked"
-					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), mock_player, stack, nil)
+					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), sam, stack, nil)
 
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
@@ -181,7 +181,7 @@ for name, def in pairs(core.registered_items) do
 					local stack = ItemStack()
 
 					When "right clicked"
-					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), mock_player, stack, pointed_thing)
+					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), sam, stack, pointed_thing)
 
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
@@ -194,7 +194,7 @@ for name, def in pairs(core.registered_items) do
 					local stack = nil
 
 					When "right clicked"
-					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), mock_player, stack, pointed_thing)
+					local left_over_stack = def.on_right_click(pos_itself, core.get_node(pos_itself), sam, stack, pointed_thing)
 
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
@@ -203,7 +203,7 @@ for name, def in pairs(core.registered_items) do
 
 			if def.on_receive_fields then
 				it("can receive an empty formspec response", function()
-					def.on_receive_fields(pos_itself, name, {}, mock_player)
+					def.on_receive_fields(pos_itself, name, {}, sam)
 				end)
 			end
 

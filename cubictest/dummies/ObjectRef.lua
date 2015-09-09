@@ -1,10 +1,10 @@
-local mocks = cubictest.mocks
-local nop, fixed = mocks.nop, mocks.fixed
-local setter, getter, multi_setter, multi_getter = mocks.setter, mocks.getter, mocks.multi_setter, mocks.multi_getter
+local dummies = cubictest.dummies
+local nop, fixed = dummies.nop, dummies.fixed
+local setter, getter, multi_setter, multi_getter = dummies.setter, dummies.getter, dummies.multi_setter, dummies.multi_getter
 ---
 -- Mock version of ObjectRef
 -- which is basically a reference to a C++ `ServerActiveObject`
-mocks.ObjectRef = {
+dummies.ObjectRef = {
 	new = function(self, object)
 		object = object or {}
 		return setmetatable(object, { __index = self })
@@ -94,7 +94,7 @@ mocks.ObjectRef = {
 	get_player_name = fixed(""), -- we override for the player object
 }
 
-mocks.LuaEntitySAO = {
+dummies.LuaEntitySAO = {
 	--* `setvelocity({x=num, y=num, z=num})`
 	setvelocity = setter("velocity"),
 	--* `getvelocity()`: returns `{x=num, y=num, z=num}`
@@ -121,9 +121,9 @@ mocks.LuaEntitySAO = {
 	end,
 --* `get_luaentity()`
 }
-setmetatable(mocks.LuaEntitySAO, { __index = mocks.ObjectRef })
+setmetatable(dummies.LuaEntitySAO, { __index = dummies.ObjectRef })
 
-mocks.Player = {
+dummies.Player = {
 	--* `is_player()`: returns true for players, false otherwise
 	is_player = fixed(true),
 
@@ -273,4 +273,4 @@ mocks.Player = {
 	--      }
 	set_nametag_attributes = getter("nametag_attributes"),
 }
-setmetatable(mocks.Player, { __index = mocks.ObjectRef })
+setmetatable(dummies.Player, { __index = dummies.ObjectRef })
