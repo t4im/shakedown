@@ -4,21 +4,21 @@ return cubictest.formatter:new {
 	end,
 
 	["Specification Start"] = function(self, run, event)
-		self:write_ln("### %s", run.target.description)
+		self:write_ln("#### %s", run.target.description)
 	end,
 
 	["TestCase Start"] = function(self, run, event)
 		self.step_index = 0
-		self:write_ln("##### … %s", run.target.description)
+		self:write_ln("###### … %s", run.target.description)
 	end,
 
 	["Step"] = function(self, run, event)
 		self.step_index = self.step_index + 1
 		if not run.success and #(run.events)-3 <= self.step_index then
 			-- intentional whitespace at the end for line break
-			self:write_ln(" %d. ~~%s %s~~  ", self.step_index, event.conjunction, event.description)
+			self:write_ln(" %d. ~~**%s** %s~~  ", self.step_index, event.conjunction, event.description)
 		else
-			self:write_ln(" %d. %s %s", self.step_index, event.conjunction, event.description)
+			self:write_ln(" %d. **%s** %s", self.step_index, event.conjunction, event.description)
 		end
 	end,
 
