@@ -11,9 +11,12 @@ local pos_itself = positions.preset
 local pointed_at = {
 	-- we test known nodes extra, because all other cases might be handled correctly and hide an error in the "common case"
 	a_known_node = {under=positions.known_node, above=positions.known_node_top, type="node"},
+	a_known_node_from_bottom = {under=positions.known_node, above=positions.known_node_bottom, type="node"},
 	a_filled_space = {under=positions.not_buildable_to_node, above=positions.not_buildable_to_node, type="node"},
 	an_unknown_node = {under=positions.unknown_node, above=positions.unknown_node_top, type="node"},
-	an_unknown_box_center = {under=positions.unknown_box_bottom, above=positions.unknown_box_center, type="node"},
+	an_unknown_node_from_bottom = {under=positions.unknown_node, above=positions.unknown_node_bottom, type="node"},
+	an_unknown_box_bottom = {under=positions.unknown_box_bottom, above=positions.unknown_box_center, type="node"},
+	an_unknown_box_top = {under=positions.unknown_box_top, above=positions.unknown_box_center, type="node"},
 	into_an_unknown_node = {under=positions.unknown_box_bottom, above=positions.unknown_box_bottom_side, type="node"},
 	a_replaceable_node = {under=positions.buildable_to_box, above=positions.buildable_to_box_top, type="node"},
 	nothing = { type="nothing" },
@@ -49,12 +52,12 @@ for name, def in pairs(core.registered_items) do
 
 		if has_custom(def, "on_place") then
 			for key, var in pairs({
-				["on top of a known node"] = {
-					at = pointed_at.a_known_node,
+				["on a known node"] = {
+					at = def.hint and def.hint.place_on == "bottom" and pointed_at.a_known_node_from_bottom or pointed_at.a_known_node,
 					succeed = true,
 				},
-				["on top of an unknown node"] = {
-					at = pointed_at.an_unknown_node,
+				["on an unknown node"] = {
+					at = def.hint and def.hint.place_on == "bottom" and pointed_at.an_unknown_node_from_bottom or pointed_at.an_unknown_node,
 					succeed = true,
 				},
 				["into an already filled space"] = {
@@ -70,11 +73,12 @@ for name, def in pairs(core.registered_items) do
 				["into a replaceable node"] = {
 					at = pointed_at.a_replaceable_node,
 					-- buildable_to nodes don't seem to like being placed into other buildable_to nodes
-					succeed = not def.buildable_to,
+					-- and we don't support bottom places nodes yet in this scenario
+					succeed = (not def.hint or def.hint.place_on ~= "bottom") and not def.buildable_to,
 					replace = "default:water_source",
 				},
 				["into an unknown node box"] = {
-					at = pointed_at.an_unknown_box_center,
+					at = def.hint and def.hint.place_on == "bottom" and pointed_at.an_unknown_box_top or pointed_at.an_unknown_box_bottom,
 					-- most expandable nodes won't like this
 					-- some might
 					succeed = nil,
@@ -124,7 +128,7 @@ for name, def in pairs(core.registered_items) do
 				["into a filled space"] = pointed_at.a_filled_space,
 				["into an unknown_node filled space"] = pointed_at.into_an_unknown_node,
 				["into a replaceable node"] = pointed_at.a_replaceable_node,
-				["into an unknown box"] = pointed_at.an_unknown_box_center,
+				["into an unknown box"] = pointed_at.an_unknown_box_bottom,
 				["at nothing"] = pointed_at.nothing,
 				["at itself"] = pointed_at.itself,
 			}) do
