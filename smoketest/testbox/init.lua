@@ -13,6 +13,8 @@ local testbox = {
 		unknown_node = {x=3, y=9, z=3},
 		unknown_node_top = {x=3, y=10, z=3},
 		unknown_box_bottom = {x=1, y=0, z=1},
+		-- for a test, where we place against an unknown into another unknown
+		unknown_box_bottom_side = {x=1, y=0, z=2},
 		unknown_box_center = {x=1, y=1, z=1},
 		ignore_box_center =  {x=6, y=3, z=3},
 	},

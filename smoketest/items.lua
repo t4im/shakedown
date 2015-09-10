@@ -14,6 +14,7 @@ local pointed_at = {
 	a_filled_space = {under=positions.not_buildable_to_node, above=positions.not_buildable_to_node, type="node"},
 	an_unknown_node = {under=positions.unknown_node, above=positions.unknown_node_top, type="node"},
 	an_unknown_box_center = {under=positions.unknown_box_bottom, above=positions.unknown_box_center, type="node"},
+	into_an_unknown_node = {under=positions.unknown_box_bottom, above=positions.unknown_box_bottom_side, type="node"},
 	a_replaceable_node = {under=positions.buildable_to_box, above=positions.buildable_to_box_top, type="node"},
 	nothing = { type="nothing" },
 	itself = {under=pos_itself, above=positions.preset_top, type="node"}
@@ -58,6 +59,11 @@ for name, def in pairs(core.registered_items) do
 				},
 				["into an already filled space"] = {
 					at = pointed_at.a_filled_space,
+					-- this is supposed to fail by design
+					succeed = false,
+				},
+				["into an unknown_node filled space"] = {
+					at = pointed_at.into_an_unknown_node,
 					-- this is supposed to fail by design
 					succeed = false,
 				},
@@ -115,8 +121,10 @@ for name, def in pairs(core.registered_items) do
 			for key, var in pairs({
 				["on top of a known node"] = pointed_at.a_known_node,
 				["on top of an unknown node"] = pointed_at.an_unknown_node,
+				["into a filled space"] = pointed_at.a_filled_space,
+				["into an unknown_node filled space"] = pointed_at.into_an_unknown_node,
 				["into a replaceable node"] = pointed_at.a_replaceable_node,
-				["into an unknown node"] = pointed_at.an_unknown_box_center,
+				["into an unknown box"] = pointed_at.an_unknown_box_center,
 				["at nothing"] = pointed_at.nothing,
 				["at itself"] = pointed_at.itself,
 			}) do
