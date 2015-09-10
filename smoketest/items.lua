@@ -5,6 +5,8 @@ local testbox, positions = smoketest.testbox, smoketest.testbox.positions
 local sam = cubictest.dummies.Player:new()
 local initial_stack_size = 5
 
+local expect_infinite_stacks = core.setting_getbool("creative_mode")
+
 local pos_itself = positions.preset
 local pointed_at = {
 	-- we test known nodes extra, because all other cases might be handled correctly and hide an error in the "common case"
@@ -84,16 +86,18 @@ for name, def in pairs(core.registered_items) do
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
 
-					if is_node and var.decrement == true then
-						-- And "have something placed"
-						-- This doesn't work well with e.g. expandable multinode objects.
-						-- Or anything else, that might abort the placement.
-						-- assert.is_not_equal("air", core.get_node(pos).name)
-						And "reduce the itemstack count"
-						assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
-					elseif is_node and var.decrement == false then -- not nil!
-						But "do not reduce the itemstack count"
-						assert.is_equal(initial_stack_size, left_over_stack:get_count())
+					if is_node and not expect_infinite_stacks then
+						if var.decrement == true then
+							-- And "have something placed"
+							-- This doesn't work well with e.g. expandable multinode objects.
+							-- Or anything else, that might abort the placement.
+							-- assert.is_not_equal("air", core.get_node(pos).name)
+							And "reduce the itemstack count"
+							assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
+						elseif var.decrement == false then -- not nil!
+							But "do not reduce the itemstack count"
+							assert.is_equal(initial_stack_size, left_over_stack:get_count())
+						end
 					end
 				end)
 			end
