@@ -13,7 +13,7 @@ local pointed_at = {
 	a_known_node = {under=positions.known_node, above=positions.known_node_top, type="node"},
 	a_filled_space = {under=positions.not_buildable_to_node, above=positions.not_buildable_to_node, type="node"},
 	an_unknown_node = {under=positions.unknown_node, above=positions.unknown_node_top, type="node"},
-	an_unknown_box_center = {under=positions.unknown_box_center, above=positions.unknown_box_center, type="node"},
+	an_unknown_box_center = {under=positions.unknown_box_bottom, above=positions.unknown_box_center, type="node"},
 	a_replaceable_node = {under=positions.buildable_to_box, above=positions.buildable_to_box_top, type="node"},
 	nothing = { type="nothing" },
 	itself = {under=pos_itself, above=positions.preset_top, type="node"}
@@ -50,27 +50,28 @@ for name, def in pairs(core.registered_items) do
 			for key, var in pairs({
 				["on top of a known node"] = {
 					at = pointed_at.a_known_node,
-					decrement = true,
+					succeed = true,
 				},
 				["on top of an unknown node"] = {
 					at = pointed_at.an_unknown_node,
-					decrement = true,
+					succeed = true,
 				},
-				["into an allready filled space"] = {
+				["into an already filled space"] = {
 					at = pointed_at.a_filled_space,
 					-- this is supposed to fail by design
-					decrement = false,
+					succeed = false,
 				},
 				["into a replaceable node"] = {
 					at = pointed_at.a_replaceable_node,
 					-- buildable_to nodes don't seem to like being placed into other buildable_to nodes
-					decrement = not def.buildable_to
+					succeed = not def.buildable_to,
+					replace = "default:water_source",
 				},
 				["into an unknown node box"] = {
 					at = pointed_at.an_unknown_box_center,
 					-- most expandable nodes won't like this
 					-- some might
-					decrement = nil,
+					succeed = nil,
 				},
 
 			}) do
@@ -86,15 +87,22 @@ for name, def in pairs(core.registered_items) do
 					Then "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
 
-					if is_node and not expect_infinite_stacks then
-						if var.decrement == true then
+					if is_node then
+						if var.replace and var.succeed == true then
+							And "replace the buildable_to node"
+							assert.is_not_equal(var.replace, core.get_node(pointed_thing.under).name)
+						else
+							But "do not replace pointed_thing.under"
+							assert.is_not_equal(name, core.get_node(pointed_thing.under).name)
+						end
+
+						if not expect_infinite_stacks and var.succeed == true then
 							-- And "have something placed"
 							-- This doesn't work well with e.g. expandable multinode objects.
 							-- Or anything else, that might abort the placement.
-							-- assert.is_not_equal("air", core.get_node(pos).name)
 							And "reduce the itemstack count"
 							assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
-						elseif var.decrement == false then -- not nil!
+						elseif not expect_infinite_stacks and var.succeed == false then -- not nil!
 							But "do not reduce the itemstack count"
 							assert.is_equal(initial_stack_size, left_over_stack:get_count())
 						end
