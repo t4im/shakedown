@@ -94,18 +94,20 @@ for name, def in pairs(core.registered_items) do
 					When "calling its on_place"
 					local left_over_stack = def.on_place(stack, sam, pointed_thing)
 
-					Then "return the leftover itemstack"
+					if is_node then
+						if var.replace and var.succeed == true then
+							Then "replace the buildable_to node"
+							assert.is_not_equal(var.replace, core.get_node(pointed_thing.under).name)
+						else
+							Then "do not replace pointed_thing.under"
+							assert.is_not_equal(name, core.get_node(pointed_thing.under).name)
+						end
+					end
+
+					And "return the leftover itemstack"
 					assert.is_itemstack(left_over_stack)
 
 					if is_node then
-						if var.replace and var.succeed == true then
-							And "replace the buildable_to node"
-							assert.is_not_equal(var.replace, core.get_node(pointed_thing.under).name)
-						else
-							But "do not replace pointed_thing.under"
-							assert.is_not_equal(name, core.get_node(pointed_thing.under).name)
-						end
-
 						if not expect_infinite_stacks and var.succeed == true then
 							-- And "have something placed"
 							-- This doesn't work well with e.g. expandable multinode objects.
