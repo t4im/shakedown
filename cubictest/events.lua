@@ -33,7 +33,7 @@ events.Error = Event {
 	type = "Error",
 	meta = {
 		__call = function(self, err)
-			return self:new { message=tostring(err), }
+			return self:new { message=tostring(err), effect=err.effect }
 		end,
 	},
 }
@@ -65,11 +65,12 @@ local Stats = {
 		object = object or {
 			passed = 0,
 			failed = 0,
+			skipped = 0,
 		}
 		return setmetatable(object, { __index = self, __tostring = self.tostring})
 	end,
 	get_total = function(self)
-		return self.failed + self.passed
+		return self.failed + self.passed + self.skipped
 	end,
 	inc = function(self, stat, count)
 		self[stat] = (self[stat] or 0) + (count or 1)
@@ -77,9 +78,10 @@ local Stats = {
 	inc_all = function(self, stats)
 		self:inc("passed", stats.passed or 0)
 		self:inc("failed", stats.failed or 0)
+		self:inc("skipped", stats.skipped or 0)
 	end,
 	tostring = function (self)
-		return string.format("%d passed, %d failed", self.passed, self.failed)
+		return string.format("%d passed, %d failed, %d skipped", self.passed, self.failed, self.skipped)
 	end,
 }
 
@@ -107,13 +109,18 @@ events.Run = Event {
 			if event.success then
 				stats:inc("passed")
 			else
-				stats:inc("failed")
+				if event.failure and event.failure.effect then
+					stats:inc(event.failure.effect)
+				else
+					stats:inc("failed")
+				end
 				self.success = false
 			end
 			self.children_stats:inc_all(event.stats)
 		elseif event.type == "Error" then
 			-- :'-(
 			self.success = false
+			self.failure = event
 		end
 		event.parent = self
 		table.insert(self.events, event)
