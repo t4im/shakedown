@@ -92,6 +92,7 @@ events.Run = Event {
 				events = {},
 				stats = Stats:new(),
 				children_stats = Stats:new(),
+				-- this controls whether or not children can and will be run
 				-- lets start positive, sadness will come on its own
 				success = true,
 			}

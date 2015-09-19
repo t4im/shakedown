@@ -12,7 +12,6 @@ cubictest.testrunner = testrunner
 local Testable = {
 	description=nil,
 	func= function() error("no test defined") end,
-	success = nil,
 	__tostring = function (self) return self.description end,
 	new = function(self, object)
 		object = object or {}
@@ -38,7 +37,12 @@ local Testable = {
 		run_state:add(Start())
 		if self._set_up then self:_set_up() end
 		if self.fixture_setup then self.fixture_setup() end
-		self:_run(run_state)
+
+		-- run, but only if fixtures haven't already failed
+		if run_state.success then
+			self:_run(run_state)
+		end
+
 		if self.fixture_teardown then self.fixture_teardown() end
 		if self._tear_down then self:_tear_down() end
 		run_state:add(End())
@@ -67,7 +71,6 @@ cubictest.TestCase = Testable {
 		return step
 	end,
 	_run = function(self, run_state)
-		if not run_state.success then return end
 		return self:try(self.func)
 	end,
 }
