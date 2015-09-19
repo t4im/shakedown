@@ -88,9 +88,11 @@ local Stats = {
 events.Run = Event {
 	type = "Run",
 	meta = {
-		__call = function(self, target)
+		__call = function(self, target, parent_event)
 			return self:new {
 				target = target,
+				-- allow to set it early, so we can use it within the run
+				parent = parent_event,
 				events = {},
 				stats = Stats:new(),
 				children_stats = Stats:new(),

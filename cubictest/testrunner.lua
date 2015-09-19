@@ -27,10 +27,9 @@ local Testable = {
 	add = function(self, child)
 		table.insert(self.children, child)
 	end,
-	run = function(self)
+	run = function(self, run_state)
 		-- make sure we don't have stale events from the last run
 		-- and start the event log
-		local run_state = Run(self)
 		self.run_state = run_state
 
 		-- run its test phases
@@ -86,7 +85,7 @@ cubictest.Specification = Testable {
 	_run = function(self, run_state)
 		for _, testcase in pairs(self.children) do
 			testrunner.ctx_case = testcase
-			local result_state = testcase:run()
+			local result_state = testcase:run(Run(testcase, run_state))
 			run_state:add(result_state)
 		end
 		testrunner.ctx_case = nil
@@ -112,7 +111,7 @@ function cubictest.testrunner:runAll(filter)
 	for _, spec in pairs(specifications) do
 		if not filter or filter(spec) then
 			self.ctx_spec = spec
-			local result_state = spec:run()
+			local result_state = spec:run(Run(spec, run_state))
 			run_state:add(result_state)
 		end
 	end
