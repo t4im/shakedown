@@ -75,7 +75,7 @@ return function(name, def)
 
 				if var.succeed then
 					Then "check protection"
-					assert.spy(core.is_protected).was_called_with(cubictest.match.is_table(), sam:get_player_name())
+					assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
 				end
 
 				if is_node then
