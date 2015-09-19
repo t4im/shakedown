@@ -21,7 +21,18 @@ local testcase_env = {
 	And = function(description) return testrunner.ctx_case:step("And", description:multi_line_clean()) end,
 	But = function(description) return testrunner.ctx_case:step("But", description:multi_line_clean()) end,
 }
-cubictest.testcase_env = setmetatable(testcase_env, {__index = abstract_test_env })
+cubictest.testcase_env = setmetatable(testcase_env, {
+	__index = function(table, key)
+		if key == "self" then
+			-- return the testcase definition
+			return testrunner.ctx_case
+		elseif key == "this" then
+			-- return the testrun
+			return testrunner.ctx_case.run_state
+		end
+		return abstract_test_env[key]
+	end
+})
 
 local spec_env = {
 	it = function(description, func)
@@ -43,7 +54,14 @@ local spec_env = {
 }
 
 cubictest.spec_env = setmetatable(spec_env, {
-	__index = abstract_test_env,
+	__index = function(table, key)
+		if key == "self" then
+			return testrunner.ctx_spec
+		elseif key == "this" then
+			return testrunner.ctx_spec.run_state
+		end
+		return abstract_test_env[key]
+	end,
 	__newindex = function(table, key, value)
 		-- alternative way to specify fixtures
 		if type(table[key]) == "function" and type(value) == "function" then
