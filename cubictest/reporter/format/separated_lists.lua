@@ -19,7 +19,7 @@ return cubictest.formatter:new {
 	end,
 
 	["Specification End"] = function(self, run, event)
-		local summary = string.format("%s (%d/%d)", run.success and "ok" or "fail", run.passed, run:get_total())
+		local summary = string.format("%s (%d/%d)", run.success and "ok" or "fail", run.stats.passed, run.stats:get_total())
 		self:write_ln("=========================================================[ %16s ]===", summary)
 	end,
 
@@ -42,6 +42,10 @@ return cubictest.formatter:new {
 	end,
 
 	["Generic Error"] = function(self, run, event)
+		if event.effect == "skipped" then
+			self:write_ln("[=] skipped: failed assumption")
+			return
+		end
 		self:write_ln("[!] but fails with:\n%s", event.message)
 	end,
 }

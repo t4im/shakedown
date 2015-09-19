@@ -10,17 +10,24 @@ return cubictest.formatter:new{
 	end,
 
 	["Generic Error"] = function(self, run, event)
+		if event.effect == "skipped" then return end
 		self:write_ln("# ! it fails with:")
 		self:write_ln(event.message:prefix_lines("# !"))
 	end,
 
 	["Specification Start"] = function(self, run, event)
-		self:write_ln("# describe %s (%d/%d):", run.target.description, run.passed, run:get_total())
+		self:write_ln("# describe %s (%d/%d):", run.target.description, run.stats.passed, run.stats:get_total())
 	end,
 
 	["TestCase Start"] = function(self, run, event)
 		self.index = self.index + 1
-		self:write_ln("%s %d - %s", run.success and "ok" or "not ok", self.index, run.target.description)
+		local ok = run.success and "ok" or "not ok"
+		local directive = ""
+		if run.failure and run.failure.effect == "skipped" then
+			ok = "ok"
+			directive = " # SKIP failed assumption"
+		end
+		self:write_ln("%s %d - %s%s", ok, self.index, run.target.description, directive)
 	end,
 
 	["Step"] = function(self, run, event)

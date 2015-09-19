@@ -23,6 +23,10 @@ return cubictest.formatter:new {
 	end,
 
 	["TestCase Error"] = function(self, run, event)
+		if event.effect == "skipped" then
+			self:write_ln("    Skipped: failed assumption")
+			return
+		end
 		self:write_ln("    Fail with:\n")
 		self:write_ln(event.message:prefix_lines("    > "))
 	end,
