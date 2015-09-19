@@ -29,12 +29,12 @@ return cubictest.formatter:new {
 
 	["Suite End"] = function(self, run, event)
 		self:write_ln(string.rep("*", 80))
-		local cases_total = run.children_passed + run.children_failed
-		self:write_ln("*** Run %d tests (%d passed, %d failed)",
-			cases_total, run.children_passed, run.children_failed)
-		local specs_total = run:get_total()
-		self:write_ln("*** of %d specifications (%d passed, %d failed)",
-			specs_total, run.passed, run.failed)
+		local cases_total = run.children_stats:get_total()
+		self:write_ln("*** Run %d tests (%s)",
+			cases_total, tostring(run.children_stats))
+		local specs_total = run.stats:get_total()
+		self:write_ln("*** of %d specifications (%s)",
+			specs_total, tostring(run.stats))
 		local run_time = event.time - run.events[1].time
 		self:write_ln("*** in %.2fs (avg. %.2fms/test %.2fms/spec)",
 			run_time/1000000, run_time/cases_total/1000, run_time/specs_total/1000)

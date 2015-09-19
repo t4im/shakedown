@@ -60,6 +60,29 @@ events.End = Event {
 	},
 }
 
+local Stats = {
+	new = function(self, object)
+		object = object or {
+			passed = 0,
+			failed = 0,
+		}
+		return setmetatable(object, { __index = self, __tostring = self.tostring})
+	end,
+	get_total = function(self)
+		return self.failed + self.passed
+	end,
+	inc = function(self, stat, count)
+		self[stat] = (self[stat] or 0) + (count or 1)
+	end,
+	inc_all = function(self, stats)
+		self:inc("passed", stats.passed or 0)
+		self:inc("failed", stats.failed or 0)
+	end,
+	tostring = function (self)
+		return string.format("%d passed, %d failed", self.passed, self.failed)
+	end,
+}
+
 events.Run = Event {
 	type = "Run",
 	meta = {
@@ -67,39 +90,31 @@ events.Run = Event {
 			return self:new {
 				target = target,
 				events = {},
-				passed = 0,
-				children_passed = 0,
-				failed = 0,
-				children_failed = 0,
+				stats = Stats:new(),
+				children_stats = Stats:new(),
 				-- lets start positive, sadness will come on its own
 				success = true,
 			}
 		end,
 	},
 	add = function(self, event)
+		local stats = self.stats
 		if event.type == "Step" then
 			-- every step we make, until we throw an error
-			self.passed = self.passed + 1
+			stats:inc("passed")
 		elseif event.type == "Run" then
 			if event.success then
-				self.passed = self.passed + 1
+				stats:inc("passed")
 			else
-				self.failed = self.failed + 1
+				stats:inc("failed")
 				self.success = false
 			end
-			self.children_passed = self.children_passed + event.passed
-			self.children_failed = self.children_failed + event.failed
+			self.children_stats:inc_all(event.stats)
 		elseif event.type == "Error" then
 			-- :'-(
 			self.success = false
 		end
 		event.parent = self
 		table.insert(self.events, event)
-	end,
-	get_verdict = function(self)
-		return self.success and "OK" or "FAILED"
-	end,
-	get_total = function(self)
-		return self.failed + self.passed
 	end,
 }
