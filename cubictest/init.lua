@@ -11,6 +11,9 @@ dofile(modpath .. "/compat.lua")
 -- load external dependencies
 dofile(modpath .. "/lib/init.lua")
 
+-- assumptions need to be load before the api, but after assertions
+dofile(modpath .. "/assumptions.lua")
+
 -- the test framework itself
 dofile(modpath .. "/reporter/init.lua")
 dofile(modpath .. "/events.lua")

@@ -8,6 +8,7 @@ local abstract_test_env = {
 	spy = cubictest.spy,
 	stub = cubictest.stub,
 	mock = cubictest.mock,
+	assume = cubictest.assume,
 }
 cubictest.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
