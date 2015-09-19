@@ -63,32 +63,18 @@ return function(name, def)
 
 		}) do
 			it("can be placed " .. key, function()
-				core.is_protected:clear()
-
 				Given "an ItemStack()"
 				local stack = ItemStack { name = name, count = initial_stack_size }
 				And ("a pointed_thing, pointing " .. key)
 				local pointed_thing = var.at
 
 				When "calling its on_place"
+				core.is_protected:clear()
+				this.parent.placed = false
 				local left_over_stack = def.on_place(stack, sam, pointed_thing)
+				this.parent.placed = true
 
-				if var.succeed then
-					Then "check protection"
-					assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
-				end
-
-				if is_node then
-					if var.replace and var.succeed == true then
-						And "replace the buildable_to node"
-						assert.is_not_equal(var.replace, core.get_node(pointed_thing.under).name)
-					else
-						And "do not replace pointed_thing.under"
-						assert.is_not_equal(name, core.get_node(pointed_thing.under).name)
-					end
-				end
-
-				And "return the leftover itemstack"
+				Then "return the leftover itemstack"
 				assert.is_itemstack(left_over_stack)
 
 				if is_node then
@@ -104,6 +90,26 @@ return function(name, def)
 					end
 				end
 			end)
+			if var.succeed then
+				it("checks protection when placed " .. key, function()
+					assume.is_true(this.parent.placed)
+					assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
+				end)
+			end
+			if is_node then
+				if var.replace and var.succeed == true then
+					it("replaces the buildable_to node when placed " .. key, function()
+						assume.is_true(this.parent.placed)
+						assert.is_not_equal(var.replace, core.get_node(var.at.under).name)
+					end)
+				else
+					it("does not replace pointed_thing.under when placed " .. key, function()
+						assume.is_true(this.parent.placed)
+						assert.is_not_equal(name, core.get_node(var.at.under).name)
+					end)
+				end
+			end
+
 		end
 
 		tear_down(function()
