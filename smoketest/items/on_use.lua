@@ -14,6 +14,8 @@ return function(name, def)
 			["into an unknown_node filled space"] = pointed_at.into_an_unknown_node,
 			["into a replaceable node"] = pointed_at.a_replaceable_node,
 			["into an unknown box"] = pointed_at.an_unknown_box_bottom,
+			["at an entity"] = pointed_at.an_entity,
+			["at another player"] = pointed_at.another_player,
 			["at nothing"] = pointed_at.nothing,
 			["at itself"] = pointed_at.itself,
 		}) do

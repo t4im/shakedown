@@ -13,7 +13,9 @@ smoketest.pointed_at = {
 	into_an_unknown_node = {under=positions.unknown_box_bottom, above=positions.unknown_box_bottom_side, type="node"},
 	a_replaceable_node = {under=positions.buildable_to_box, above=positions.buildable_to_box_top, type="node"},
 	nothing = { type="nothing" },
-	itself = {under=positions.preset, above=positions.preset_top, type="node"}
+	itself = {under=positions.preset, above=positions.preset_top, type="node"},
+	an_entity = { type="object", ref=cubictest.dummies.LuaEntitySAO:new() },
+	another_player = { type="object", ref=cubictest.dummies.Player:new({player_name="Simone"}) },
 }
 
 local item_spec_path = smoketest.modpath .. "/items/"
