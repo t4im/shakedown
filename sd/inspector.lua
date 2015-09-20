@@ -187,7 +187,8 @@ core.register_tool(modname .. ":inspector", {
 	end,
 	on_place = function(itemstack, placer, pointed_thing)
 		local pos = pointed_thing.above
-		if not pos then return end -- pointed at air
+		if not pos then return itemstack end -- pointed at air
 		switch_tab(placer:get_player_name(), 1, pos)
+		return itemstack
 	end,
 })
