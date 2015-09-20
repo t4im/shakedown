@@ -108,6 +108,7 @@ local function create_inspector_formspec(pos, def)
 	insert(formspec, format("field[%f,0.3;2,1;position;;%d,%d,%d]", fs_width - side_width + 1.3, pos.x, pos.y, pos.z))
 	insert(formspec, format("label[%f,1;%s]", fs_width - side_width, node.name))
 	insert(formspec, format("label[%f,1.3;Raw: %d (%d, %d)]", fs_width - side_width, core.get_content_id(node.name), node.param1, node.param2))
+	insert(formspec, format("label[%f,1.9;%s]", fs_width - side_width, core.is_protected(pos, "") and "protected" or "unprotected"))
 
 	if def.content then
 		insert(formspec, def.content)
