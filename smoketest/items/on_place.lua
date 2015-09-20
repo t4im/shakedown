@@ -20,6 +20,7 @@ end
 return function(name, def)
 	if not has_custom(def, "on_place") then return end
 	local is_node = def.type == "node"
+	local hint = def.hint or {}
 
 	describe(name .. " on_place", function()
 		set_up(function()
@@ -30,11 +31,11 @@ return function(name, def)
 
 		for key, var in pairs({
 			["on a known node"] = {
-				at = def.hint and def.hint.place_on == "bottom" and pointed_at.a_known_node_from_bottom or pointed_at.a_known_node,
+				at = hint.place_on == "bottom" and pointed_at.a_known_node_from_bottom or pointed_at.a_known_node,
 				succeed = true,
 			},
 			["on an unknown node"] = {
-				at = def.hint and def.hint.place_on == "bottom" and pointed_at.an_unknown_node_from_bottom or pointed_at.an_unknown_node,
+				at = hint.place_on == "bottom" and pointed_at.an_unknown_node_from_bottom or pointed_at.an_unknown_node,
 				succeed = true,
 			},
 			["into an already filled space"] = {
@@ -51,11 +52,11 @@ return function(name, def)
 				at = pointed_at.a_replaceable_node,
 				-- buildable_to nodes don't seem to like being placed into other buildable_to nodes
 				-- and we don't support bottom places nodes yet in this scenario
-				succeed = (not def.hint or def.hint.place_on ~= "bottom") and not def.buildable_to,
+				succeed = hint.place_on ~= "bottom" and not def.buildable_to,
 				replace = "default:water_source",
 			},
 			["into an unknown node box"] = {
-				at = def.hint and def.hint.place_on == "bottom" and pointed_at.an_unknown_box_top or pointed_at.an_unknown_box_bottom,
+				at = hint.place_on == "bottom" and pointed_at.an_unknown_box_top or pointed_at.an_unknown_box_bottom,
 				-- most expandable nodes won't like this
 				-- some might
 				succeed = nil,
@@ -90,7 +91,8 @@ return function(name, def)
 					end
 				end
 			end)
-			if var.succeed then
+			if hint.protection_check == true
+				or var.succeed and not hint.protection_check == false then
 				it("checks protection when placed " .. key, function()
 					assume.is_true(this.parent.placed)
 					assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
