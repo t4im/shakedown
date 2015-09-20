@@ -11,7 +11,7 @@ local function is_testable(name, def)
 	return true
 end
 
-for name, def in pairs(core.chatcommands) do
+local function describe_chatcommand(name, def)
 	if is_testable(name, def) then
 		describe("/" .. name, function()
 			it("can be called from virtual players", function()
@@ -19,4 +19,15 @@ for name, def in pairs(core.chatcommands) do
 			end)
 		end)
 	end
+end
+
+-- describe anything registered so far
+for name, def in pairs(core.chatcommands) do
+	describe_chatcommand(name, def)
+end
+-- describe anything registered from now on, too
+local register_chatcommand = core.register_chatcommand
+core.register_chatcommand = function(cmd, def)
+	register_chatcommand(cmd, def)
+	describe_chatcommand(cmd, def)
 end

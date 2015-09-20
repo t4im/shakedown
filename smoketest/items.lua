@@ -24,8 +24,19 @@ for _, filename in ipairs(core.get_dir_list(item_spec_path, false)) do
 	table.insert(spec_list, dofile(item_spec_path .. filename))
 end
 
-for name, def in pairs(core.registered_items) do
+local function describe_item(name, def)
 	for _, specf in ipairs(spec_list) do
 		specf(name, def)
 	end
+end
+
+-- describe anything registered so far
+for name, def in pairs(core.registered_items) do
+	describe_item(name, def)
+end
+-- describe anything registered from now on, too
+local register_item = core.register_item
+core.register_item = function(cmd, def)
+	register_item(cmd, def)
+	describe_item(cmd, def)
 end
