@@ -36,7 +36,12 @@ for name, def in pairs(core.registered_items) do
 end
 -- describe anything registered from now on, too
 local register_item = core.register_item
-core.register_item = function(cmd, def)
-	register_item(cmd, def)
-	describe_item(cmd, def)
+core.register_item = function(name, def)
+	register_item(name, def)
+
+	-- deal with escaped modnames
+	if name:sub(1,1) == ":" then
+		name = name:sub(2)
+	end
+	describe_item(name, def)
 end
