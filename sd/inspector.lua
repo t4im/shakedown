@@ -140,7 +140,6 @@ local function show_raw_table_data(playername, pos, table)
 end
 
 local function switch_tab(playername, tab_index, pos, ...)
-	local node = core.get_node(pos)
 	core.show_formspec(playername, formspec_name, create_inspector_formspec(pos, {
 		tab_index = tab_index,
 		content = tabs[tab_index]:formspec(pos, ...),
@@ -183,7 +182,7 @@ core.register_tool(modname .. ":inspector", {
 	liquids_pointable = true,
 	on_use = function(itemstack, user, pointed_thing)
 		local pos = pointed_thing.under
-		if not pos then return end -- pointed at air
+		if not pos then return end -- pointed at air or object
 		switch_tab(user:get_player_name(), 1, pos)
 	end,
 	on_place = function(itemstack, placer, pointed_thing)
