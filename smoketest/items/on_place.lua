@@ -122,7 +122,7 @@ return function(name, def)
 				end
 			end
 
-			if def.after_place_node then
+			if def.after_place_node and var.succeed == true then
 				it("calls its after_place_node after placed" .. key, function()
 					assume.is_true(this.parent.placed)
 					assert.spy(def.after_place_node).was_called()
