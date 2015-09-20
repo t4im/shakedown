@@ -1,7 +1,6 @@
 local core, cubictest, smoketest = core, cubictest, smoketest
 local positions = smoketest.testbox.positions
 
-smoketest.sam = cubictest.dummies.Player:new()
 smoketest.pointed_at = {
 	-- we test known nodes extra, because all other cases might be handled correctly and hide an error in the "common case"
 	a_known_node = {under=positions.known_node, above=positions.known_node_top, type="node"},
