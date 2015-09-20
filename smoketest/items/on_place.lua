@@ -17,6 +17,13 @@ local function has_custom(def, name)
 		and field ~= core.item_place
 end
 
+local function clear_spies(def)
+	core.is_protected:clear()
+	if def.after_place_node then
+		def.after_place_node:clear()
+	end
+end
+
 return function(name, def)
 	if not has_custom(def, "on_place") then return end
 	local is_node = def.type == "node"
@@ -27,6 +34,9 @@ return function(name, def)
 			testbox.replace(is_node and name or "default:stone")
 
 			spy.on(core, "is_protected")
+			if def.after_place_node then
+				spy.on(def, "after_place_node")
+			end
 		end)
 
 		for key, var in pairs({
@@ -70,7 +80,7 @@ return function(name, def)
 				local pointed_thing = var.at
 
 				When "calling its on_place"
-				core.is_protected:clear()
+				clear_spies(def)
 				this.parent.placed = false
 				local left_over_stack = def.on_place(stack, sam, pointed_thing)
 				this.parent.placed = true
@@ -112,10 +122,19 @@ return function(name, def)
 				end
 			end
 
+			if def.after_place_node then
+				it("calls its after_place_node after placed" .. key, function()
+					assume.is_true(this.parent.placed)
+					assert.spy(def.after_place_node).was_called()
+				end)
+			end
 		end
 
 		tear_down(function()
 			core.is_protected:revert()
+			if def.after_place_node then
+				def.after_place_node:revert()
+			end
 		end)
 	end)
 end
