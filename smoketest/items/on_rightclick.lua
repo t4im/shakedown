@@ -1,5 +1,6 @@
 local smoketest = smoketest
 local sam = smoketest.sam
+local testbox = smoketest.testbox
 local pos_itself = smoketest.testbox.positions.preset
 local pointed_at = smoketest.pointed_at
 
@@ -7,6 +8,9 @@ return function(name, def)
 	if not def.on_rightclick or def.type ~= "node" then return end
 
 	describe(name .. " on_rightclick", function()
+		set_up(function()
+			testbox.replace(name)
+		end)
 		it("can be rightclicked without pointed_thing", function()
 			Given "no pointed_thing at all"
 			And "a simple ItemStack()"

@@ -37,6 +37,7 @@ function testbox.replace(preset)
 	core.place_schematic({x=0, y=0, z=0}, path .. "/testbox.mts", 0, {
 		["testbox:placeholder_preset"] = preset or "air"
 	}, true)
+	core.set_node(testbox.positions.preset, { name = preset or "air"})
 end
 
 testbox.compile()

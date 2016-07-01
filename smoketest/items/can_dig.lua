@@ -1,9 +1,13 @@
-local pos_itself = smoketest.testbox.positions.preset
+local testbox = smoketest.testbox
+local pos_itself = testbox.positions.preset
 
 return function(name, def)
 	if not def.can_dig or def.type ~= "node" then return end
 
 	describe(name .. " can_dig", function()
+		set_up(function()
+			testbox.replace(name)
+		end)
 		-- this is essentially what core.dig_node(pos) would do, too
 		it("handles a null player passed to its can_dig(pos, [player])", function()
 			When "being called"
