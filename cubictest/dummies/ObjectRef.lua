@@ -134,14 +134,28 @@ dummies.Player = {
 
 	--* `get_look_dir()`: get camera direction as a unit vector
 	get_look_dir = getter("look_dir", {x=0,y=0,z=0}), -- vector.new(0, 0, 0)
-	--* `get_look_pitch()`: pitch in radians
-	get_look_pitch = getter("look_pitch", 0),
-	--* `get_look_yaw()`: yaw in radians (wraps around pretty randomly as of now)
-	get_look_yaw = getter("look_yaw", 0),
-	--* `set_look_pitch(radians)`: sets look pitch
-	set_look_pitch = setter("look_pitch"),
-	--* `set_look_yaw(radians)`: sets look yaw
-	set_look_yaw = setter("look_yaw"),
+	--* `get_look_vertical()`: pitch in radians
+	--     * Angle ranges between -pi/2 and pi/2, which are straight up and down respectively.
+	get_look_vertical = getter("look_vertical", 0),
+	--* `get_look_horizontal()`: yaw in radians
+	--     * Angle is counter-clockwise from the +z direction.
+	get_look_horizontal = getter("look_horizontal", 0),
+	--* `set_look_vertical(radians)`: sets look pitch
+	--     * radians - Angle from looking forward, where positive is downwards.
+	set_look_vertical = setter("look_vertical"),
+	--* `set_look_horizontal(radians)`: sets look yaw
+	--     * radians - Angle from the +z direction, where positive is counter-clockwise.
+	set_look_horizontal = setter("look_horizontal"),
+	--* `get_look_pitch()`: pitch in radians - Deprecated as broken. Use get_look_vertical.
+	--     * Angle ranges between -pi/2 and pi/2, which are straight down and up respectively.
+	get_look_pitch = getter("look_vertical", 0),
+	--* `get_look_yaw()`: yaw in radians - Deprecated as broken. Use get_look_horizontal.
+	get_look_yaw = getter("look_horizontal", 0),
+	--     * Angle is counter-clockwise from the +x direction.
+	--* `set_look_pitch(radians)`: sets look pitch - Deprecated. Use set_look_vertical.
+	set_look_pitch = setter("look_vertical"),
+	--* `set_look_yaw(radians)`: sets look yaw - Deprecated. Use set_look_horizontal.
+	set_look_yaw = setter("look_horizontal"),
 
 	--* `get_breath()`: returns players breath
 	get_breath = getter("breath", cubictest.constants.PLAYER_MAX_BREATH),
@@ -205,17 +219,23 @@ dummies.Player = {
 	--    * if a flag equals `nil`, the flag is not modified
 	--    * note that setting `minimap` modifies the client's permission to view the minimap -
 	--    * the client may locally elect to not view the minimap
+	hud_set_flags = setter("hud_flags"),
 	--* `hud_get_flags()`: returns a table containing status of hud flags
 	--    * returns `{ hotbar=true, healthbar=true, crosshair=true, wielditem=true, breathbar=true, minimap=true }`
+	hud_get_flags = getter("hud_flags", { hotbar=true, healthbar=true, crosshair=true, wielditem=true, breathbar=true, minimap=true }),
 	--* `hud_set_hotbar_itemcount(count)`: sets number of items in builtin hotbar
 	--    * `count`: number of items, must be between `1` and `23`
 	--* `hud_get_hotbar_itemcount`: returns number of visible items
 	--* `hud_set_hotbar_image(texturename)`
 	--    * sets background image for hotbar
+	hud_set_hotbar_image = setter("hotbar_image"),
 	--* `hud_get_hotbar_image`: returns texturename
+	hud_get_hotbar_image = getter("hotbar_image"),
 	--* `hud_set_hotbar_selected_image(texturename)`
 	--    * sets image for selected item of hotbar
+	hud_set_hotbar_selected_image = setter("hotbar_selected_image"),
 	--* `hud_get_hotbar_selected_image`: returns texturename
+	hud_get_hotbar_selected_image = getter("hotbar_selected_image"),
 	--* `hud_replace_builtin(name, hud_definition)`
 	--    * replace definition of a builtin hud element
 	--    * `name`: `"breath"` or `"health"`
