@@ -1,4 +1,4 @@
-local string, table, core, cubictest = string, table, core, cubictest
+local string, core, cubictest = string, core, cubictest
 local world_path = core.get_worldpath()
 local reporter = {
 	report_event = function(self, event)
@@ -12,7 +12,7 @@ local reporter = {
 			formatter:event(nil, event)
 			core.log("action", formatter:flush() or "formatter did not provide any output")
 		end
-		local formatter = self.chat_formatter
+		formatter = self.chat_formatter
 		if formatter then
 			formatter:event(nil, event)
 			core.chat_send_all(formatter:flush() or "formatter did not provide any output")
@@ -67,17 +67,17 @@ function reporter.export(reportname, format, verbosity)
 	return true, "Report saved to " .. path
 end
 
-local usage = "<name> [format]"
+local export_usage = "<name> [format]"
 core.register_chatcommand(core.get_current_modname() .. ":export", {
 	description = "export tests to different formats.",
-	params = usage,
+	params = export_usage,
 	privs = { server = true },
 	func = function(name,  param)
 		local reportname, format = string.match(param, "([^ ]+) ?([0-9a-zA-Z_]*)")
 		if reportname then
 			return reporter.export(reportname, format)
 		end
-		return false, "Usage: " .. usage
+		return false, "Usage: " .. export_usage
 	end,
 })
 
@@ -96,16 +96,16 @@ function reporter.save(name)
 	return true, "Teststate saved to " .. path
 end
 
-local usage = "<name>"
+local save_usage = "<name>"
 core.register_chatcommand(core.get_current_modname() .. ":save", {
 	description = "save teststates.",
-	params = usage,
+	params = save_usage,
 	privs = { server = true },
 	func = function(name,  param)
 		local savename = string.match(param, "([^ ]+)")
 		if savename then
 			return reporter.save(savename)
 		end
-		return false, "Usage: " .. usage
+		return false, "Usage: " .. save_usage
 	end,
 })

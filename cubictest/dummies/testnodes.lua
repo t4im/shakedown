@@ -1,4 +1,3 @@
-local table = table
 local modname = core.get_current_modname()
 local dummies = cubictest.dummies
 local nodes = {

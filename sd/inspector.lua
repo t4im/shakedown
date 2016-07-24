@@ -1,4 +1,5 @@
-local format, table, insert, core = string.format, table, table.insert, core
+local format, concat, insert = string.format, table.concat, table.insert
+local core = core
 local modname = core.get_current_modname()
 
 local tabs = {}
@@ -9,7 +10,6 @@ local side_width = 3
 insert(tabs, {
 	caption = "Fields",
 	formspec = function(self, pos)
-		local node = core.get_node(pos)
 		local meta = core.get_meta(pos)
 		local fields = meta:to_table().fields
 
@@ -27,7 +27,6 @@ insert(tabs, {
 insert(tabs, {
 	caption = "Inventories",
 	formspec = function(self, pos)
-		local node = core.get_node(pos)
 		local meta = core.get_meta(pos)
 		local inv = meta:get_inventory()
 		local inventory_lists = inv:get_lists() or {}
@@ -57,8 +56,8 @@ local function concat_kv_row(cells, level, key, value)
 		value = format("%q", value)
 	elseif type == "table" then
 		cells = format("%s,%d,%s,%s", cells, level, key, core.formspec_escape(tostring(value)))
-		for key, value in pairs(value) do
-			cells = concat_kv_row(cells,level + 1,key,value)
+		for k, v in pairs(value) do
+			cells = concat_kv_row(cells,level + 1,k,v)
 		end
 		return cells
 	end
@@ -94,7 +93,7 @@ end
 captions = captions:sub(2)
 
 local function create_inspector_formspec(pos, def)
-	local def = def or {}
+	def = def or {}
 	local node = core.get_node(pos)
 	local formspec = { format("size[%d,%d]", fs_width, fs_height) }
 
@@ -116,7 +115,7 @@ local function create_inspector_formspec(pos, def)
 
 	insert(formspec, format("button_exit[%f,%f;2,1;close;Close]", fs_width - 2, fs_height - 0.7))
 
-	return table.concat(formspec)
+	return concat(formspec)
 end
 
 local function create_aliassearch_formspec(pos)
@@ -132,8 +131,8 @@ local function create_aliassearch_formspec(pos)
 end
 
 local formspec_name = modname .. ":inspect"
-local function show_raw_table_data(playername, pos, table)
-	local text = core.formspec_escape(dump(table or {}))
+local function show_raw_table_data(playername, pos, tbl)
+	local text = core.formspec_escape(dump(tbl or {}))
 	core.show_formspec(playername, formspec_name, create_inspector_formspec(pos, {
 		tmp_tab = "Raw Metadata",
 		content = format("textarea[0.3,0;%f,%f;text;;%s]", fs_width - side_width, fs_height, text),

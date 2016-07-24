@@ -1,4 +1,4 @@
-local core, cubictest, smoketest = core, cubictest, smoketest
+local core, smoketest = core, smoketest
 local sam = smoketest.sam
 
 local function is_testable(name, def)

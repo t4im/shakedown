@@ -1,4 +1,4 @@
-local string, round = string, math.round
+local string = string
 return cubictest.formatter:new {
 	["Suite Start"] = function(self, run, event)
 	end,

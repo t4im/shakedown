@@ -1,4 +1,4 @@
-local cubictest, luassert = cubictest, cubictest.luassert
+local cubictest = cubictest
 local path = cubictest.modpath ..  "/ctassert"
 
 function cubictest:register_assert(name, func, err, err_negated)

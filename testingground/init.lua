@@ -4,7 +4,6 @@ local c_stone = core.get_content_id("default:stone")
 local c_dirt_with_grass = core.get_content_id("default:dirt_with_grass")
 local c_steelblock = core.get_content_id("default:steelblock")
 local c_water = core.get_content_id("default:water_source")
-local c_lava = core.get_content_id("default:lava_source")
 local c_desert_sand = core.get_content_id("default:desert_sand")
 local mapgened_chunk_lenghts = core.get_mapgen_params().chunksize
 local biome_noise = {

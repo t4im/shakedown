@@ -42,12 +42,12 @@ return function(name, def)
 			local stack = nil
 
 			When "right clicked"
-			local left_over_stack = def.on_rightclick(pos_itself, core.get_node(pos_itself), sam, stack, pointed_thing)
+			-- local left_over_stack =
+			def.on_rightclick(pos_itself, core.get_node(pos_itself), sam, stack, pointed_thing)
 
 			-- Well, we passed nothing in, can we really expect to get something out?
 			--Then "return the leftover itemstack"
 			--assert.is_itemstack(left_over_stack)
 		end)
 	end)
-
 end

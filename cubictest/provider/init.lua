@@ -1,6 +1,4 @@
-local provider = {
-
-	}
+local provider = {}
 cubictest.provider = provider
 
 local path = cubictest.modpath ..  "/provider"
@@ -47,16 +45,16 @@ describe("provider.entries(table, key_matcher, value_matcher)", function()
 	end)
 end)
 
-function provider.entries(table, key_matcher, value_matcher)
-	local nested_next, nested_table, nested_index = pairs(table)
-	local next = function(table, index)
-		local key, value = nested_next(table, index)
+function provider.entries(iterated_table, key_matcher, value_matcher)
+	local nested_next, nested_table, nested_index = pairs(iterated_table)
+	local next = function(invariant_state, index)
+		local key, value = nested_next(invariant_state, index)
 		while key do
 			if (not key_matcher or key_matcher(key)) and
 				(not value_matcher or value_matcher(value)) then
 				return key, value
 			end
-			key, value = nested_next(table, key)
+			key, value = nested_next(invariant_state, key)
 		end
 	end
 	return next, nested_table, nested_index

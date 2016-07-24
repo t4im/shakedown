@@ -1,7 +1,6 @@
 local smoketest = smoketest
 local sam = smoketest.sam
 local testbox = smoketest.testbox
-local positions = smoketest.testbox.positions
 local pointed_at = smoketest.pointed_at
 local expect_infinite_stacks = smoketest.expect_infinite_stacks
 local initial_stack_size = 5
