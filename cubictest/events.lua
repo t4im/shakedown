@@ -113,8 +113,10 @@ events.Run = Event {
 			else
 				if event.failure and event.failure.effect then
 					stats:inc(event.failure.effect)
-				else
+				elseif event.failure then
 					stats:inc("failed")
+				else
+					stats:inc("skipped")
 				end
 				self.success = false
 			end
