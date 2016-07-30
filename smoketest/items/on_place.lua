@@ -62,7 +62,7 @@ return function(name, def)
 				-- buildable_to nodes don't seem to like being placed into other buildable_to nodes
 				-- and we don't support bottom places nodes yet in this scenario
 				succeed = hint.place_on ~= "bottom" and not def.buildable_to,
-				replace = "default:water_source",
+				replace = true,
 			},
 			["into an unknown node box"] = {
 				at = hint.place_on == "bottom" and pointed_at.an_unknown_box_top or pointed_at.an_unknown_box_bottom,
@@ -72,54 +72,93 @@ return function(name, def)
 			},
 
 		}) do
-			it("can be placed " .. key, function()
+			it("can be called " .. key, function()
+				local parent = this.parent
+
 				Given "an ItemStack()"
 				local stack = ItemStack { name = name, count = initial_stack_size }
 				And ("a pointed_thing, pointing " .. key)
 				local pointed_thing = var.at
 
+				local before_above = core.get_node(var.at.above)
+				local before_under = core.get_node(var.at.under)
+				parent.changed_above = false
+				parent.changed_under = false
+
 				When "calling its on_place"
 				clear_spies(def)
-				this.parent.placed = false
-				local left_over_stack = def.on_place(stack, sam, pointed_thing)
-				this.parent.placed = true
+				local leftover_stack = def.on_place(stack, sam, pointed_thing)
+				parent.leftover = leftover_stack
 
-				Then "return the leftover itemstack"
-				assert.is_itemstack(left_over_stack)
-
-				if is_node then
-					if not expect_infinite_stacks and var.succeed == true then
-						-- And "have something placed"
-						-- This doesn't work well with e.g. expandable multinode objects.
-						-- Or anything else, that might abort the placement.
-						And "reduce the itemstack count"
-						assert.is_equal(initial_stack_size - 1, left_over_stack:get_count())
-					elseif not expect_infinite_stacks and var.succeed == false then -- not nil!
-						But "do not reduce the itemstack count"
-						assert.is_equal(initial_stack_size, left_over_stack:get_count())
-					end
-				end
+				local new_above = core.get_node(var.at.above)
+				local new_under = core.get_node(var.at.under)
+				parent.changed_above = before_above.name ~= new_above.name
+				parent.changed_under = before_under.name ~= new_under.name
+				parent.placed = parent.changed_above or parent.changed_under
 			end)
-			if hint.protection_check == true
-				or var.succeed and not hint.protection_check == false then
-				it("checks protection when placed " .. key, function()
-					assume.is_true(this.parent.placed)
-					assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
-				end)
-			end
+
+			it("shall return the leftover itemstack when placed " .. key, function()
+				assert.is_itemstack(this.parent.leftover)
+			end)
+
 			if is_node then
-				if var.replace and var.succeed == true then
-					it("replaces the buildable_to node when placed " .. key, function()
+				it("places a node if expected " .. key, function()
+					if var.succeed == true then
+						When "placement is expected"
+						Then "place something"
+						-- We can only assume at the moment
+						-- Since we have no way of knowing,
+						-- if a node expects certain nodes to be placed on
+						-- e.g. wheat/cotton on soil, lily on water
 						assume.is_true(this.parent.placed)
-						assert.is_not_equal(var.replace, core.get_node(var.at.under).name)
-					end)
-				else
-					it("does not replace pointed_thing.under when placed " .. key, function()
+						-- assert.is_true(this.parent.placed)
+					elseif var.succeed == false then
+						When "no placement is expected"
+						Then "don't place something"
+						assume.is_false(this.parent.placed)
+					end
+				end)
+
+				it("returns the correct itemstack count when placed " .. key, function()
+					if expect_infinite_stacks then
+						When "in creative"
+						Then "do not reduce the itemstack count"
+						assert.is_equal(initial_stack_size, this.parent.leftover:get_count())
+					else
+						When "not in creative"
+						if this.parent.placed == true then
+							And "something was placed"
+							Then "reduce the itemstack count"
+							assert.is_equal(initial_stack_size - 1, this.parent.leftover:get_count())
+						else
+							And "something was not placed"
+							Then "do not reduce the itemstack count"
+							assert.is_equal(initial_stack_size, this.parent.leftover:get_count())
+						end
+					end
+				end)
+
+				it("respects buildable_to when placed " .. key, function()
+					When "placed"
+					if var.replace and var.succeed == true then
 						assume.is_true(this.parent.placed)
-						assert.is_not_equal(name, core.get_node(var.at.under).name)
+						Then "replace a pointed_thing.under, that is buildable_to"
+						assert.is_true(this.parent.changed_under)
+					else
+						Then "don't replace a pointed_thing.under, that is not buildable_to"
+						assert.is_false(this.parent.changed_under)
+					end
+				end)
+
+				if hint.protection_check == true
+						or (var.succeed ~= false and hint.protection_check ~= false) then
+					it("checks protection when placed " .. key, function()
+						assume.is_true(this.parent.placed)
+						assert.spy(core.is_protected).was_called_with(match.is_table(), sam:get_player_name())
 					end)
 				end
 			end
+
 
 			if def.after_place_node and var.succeed == true then
 				it("calls its after_place_node after placed" .. key, function()
@@ -130,10 +169,7 @@ return function(name, def)
 		end
 
 		tear_down(function()
-			core.is_protected:revert()
-			if def.after_place_node then
-				def.after_place_node:revert()
-			end
+			clear_spies(def)
 		end)
 	end)
 end
