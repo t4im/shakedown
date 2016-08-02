@@ -121,11 +121,15 @@ return function(name, def)
 
 				it("returns the correct itemstack count when placed " .. key, function()
 					if expect_infinite_stacks then
-						When "in creative"
+						When "placed in creative"
+						And "a leftover Itemstack was returned"
+						assume.is_truthy(this.parent.leftover)
 						Then "do not reduce the itemstack count"
 						assert.is_equal(initial_stack_size, this.parent.leftover:get_count())
 					else
-						When "not in creative"
+						When "placed not in creative"
+						And "a leftover Itemstack was returned"
+						assume.is_truthy(this.parent.leftover)
 						if this.parent.placed == true then
 							And "something was placed"
 							Then "reduce the itemstack count"
