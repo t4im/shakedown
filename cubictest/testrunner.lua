@@ -26,24 +26,44 @@ local Testable = {
 	end,
 	add = function(self, child)
 		table.insert(self.children, child)
+		child.parent = self
 	end,
 	run = function(self, run_state)
+		local parent = self.parent
 		-- make sure we don't have stale events from the last run
 		-- and start the event log
 		self.run_state = run_state
 
 		-- run its test phases
 		run_state:add(Start())
-		if self._set_up then self:_set_up() end
-		if self.fixture_setup then self.fixture_setup() end
+
+		if self._set_up then
+			self:_set_up()
+		end
+
+		if parent and parent.fixture_before_each then
+			parent.fixture_before_each()
+		end
+		if self.fixture_setup then
+			self.fixture_setup()
+		end
 
 		-- run, but only if fixtures haven't already failed
 		if run_state.success then
 			self:_run(run_state)
 		end
 
-		if self.fixture_teardown then self.fixture_teardown() end
-		if self._tear_down then self:_tear_down() end
+		if self.fixture_teardown then
+			self.fixture_teardown()
+		end
+		if parent and parent.fixture_after_each then
+			parent.fixture_after_each()
+		end
+
+		if self._tear_down then
+			self:_tear_down()
+		end
+
 		run_state:add(End())
 
 		return run_state

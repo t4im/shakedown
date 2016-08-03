@@ -58,15 +58,25 @@ local spec_env = {
 		setfenv(func, testcase_env)
 		return testrunner.ctx_spec:register_testcase("its " .. clean_description(description), func)
 	end,
-	set_up = function(func)
+	setup = function(func)
 		setfenv(func, testcase_env)
 		testrunner.ctx_spec.fixture_setup = func
 	end,
-	tear_down = function(func)
+	teardown = function(func)
 		setfenv(func, testcase_env)
 		testrunner.ctx_spec.fixture_teardown = func
 	end,
+	before_each = function(func)
+		setfenv(func, testcase_env)
+		testrunner.ctx_spec.fixture_before_each = func
+	end,
+	after_each = function(func)
+		setfenv(func, testcase_env)
+		testrunner.ctx_spec.fixture_after_each = func
+	end,
 }
+spec_env.set_up = spec_env.setup
+spec_env.tear_down = spec_env.teardown
 
 cubictest.spec_env = setmetatable(spec_env, {
 	__index = function(table, key)
