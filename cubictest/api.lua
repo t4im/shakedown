@@ -1,4 +1,5 @@
 local cubictest, testrunner = cubictest, cubictest.testrunner
+local sprintf = string.format
 --
 -- test definition language
 --
@@ -14,6 +15,18 @@ cubictest.abstract_test_env = setmetatable(abstract_test_env, { __index = _G })
 
 function string:multi_line_clean()
 	return self:gsub("%s+", " "):trim()
+end
+
+local conjunctions = { "and", "but" }
+
+local function clean_description(description)
+	description = description:lower()
+	for _, word in pairs(conjunctions) do
+		if description:match("%s".. word .. "%s") then
+			core.log("warning", sprintf("conjunction step '%s' found in %q, please split up your tests", word, description))
+		end
+	end
+	return description:multi_line_clean()
 end
 
 local testcase_env = {
@@ -39,11 +52,11 @@ cubictest.testcase_env = setmetatable(testcase_env, {
 local spec_env = {
 	it = function(description, func)
 		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("it " .. description:multi_line_clean(), func)
+		return testrunner.ctx_spec:register_testcase("it " .. clean_description(description), func)
 	end,
 	its = function(description, func)
 		setfenv(func, testcase_env)
-		return testrunner.ctx_spec:register_testcase("its " .. description:multi_line_clean(), func)
+		return testrunner.ctx_spec:register_testcase("its " .. clean_description(description), func)
 	end,
 	set_up = function(func)
 		setfenv(func, testcase_env)
