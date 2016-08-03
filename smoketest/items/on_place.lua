@@ -173,7 +173,10 @@ return function(name, def)
 		end
 
 		tear_down(function()
-			clear_spies(def)
+			core.is_protected:revert()
+			if def.after_place_node then
+				def.after_place_node:revert()
+			end
 		end)
 	end)
 end
