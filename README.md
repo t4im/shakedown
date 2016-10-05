@@ -50,16 +50,9 @@ git pull --recurse-submodules
 ```
 
 ## Related projects
-* [shakedown_game](https://github.com/t4im/shakedown_game/): The All-in-one Package
-* [profiler](https://github.com/t4im/profiler/): Measure and analyze performance of mods.
 * [coretest](https://github.com/t4im/coretest/): cubictest against the minetest api/core.
 
 ## License
-The following applies to all mods of this modpack unless different conditions are stated in their respective directories:
+This software is licensed under the MIT License (Expat).
+See [the license file](MIT.license) for details.
 
-  This program is free software. It comes without any warranty, to the extent permitted by applicable law.
-  You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2, as published by Sam Hocevar.
-
-See [the license file](WTFPL.license) or [the wtfpl website](http://www.wtfpl.net/) for more details.
-
-TL;DR: 'Do what the cobble you want'
