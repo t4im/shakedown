@@ -8,8 +8,16 @@ dofile(modpath .. "/config.lua")
 
 -- load compatibility layer between lua versions
 dofile(modpath .. "/compat.lua")
+
 -- load external dependencies
-dofile(modpath .. "/lib/init.lua")
+local load_libs = dofile(modpath .. "/lib/init.lua")
+local env = core.request_insecure_environment()
+assert(env, "\n================================================================================\n"
+	.. "Mod security prevents Shakedown's cubictest from loading the assertion library.\n"
+	.. "You can add cubictest to 'secure.trusted_mods', but beware, that it can decrease\n"
+	.. "effectivity of mod security and should not be run combined with any untrustworthy mods.\n"
+	.. "================================================================================\n")
+load_libs(env)
 
 -- assumptions need to be load before the api, but after assertions
 dofile(modpath .. "/assumptions.lua")
