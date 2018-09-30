@@ -18,6 +18,8 @@ assert(env, "\n=================================================================
 	.. "effectivity of mod security and should not be run combined with any untrustworthy mods.\n"
 	.. "================================================================================\n")
 load_libs(env)
+-- make sure our drop-in replacement is available outside the insecure environment as well
+assert = cubictest.assert
 
 -- assumptions need to be load before the api, but after assertions
 dofile(modpath .. "/assumptions.lua")
